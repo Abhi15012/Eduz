@@ -6,12 +6,10 @@ import Bg from '@/components/bg'
 import { useTokenSync } from '@/config/store.functions'
 import { MotiView } from 'moti'
 import { jwtDecode } from 'jwt-decode'
-import { useColorScheme as useNativeWind } from 'nativewind'
+import { useColorScheme, useColorScheme as useNativeWind } from 'nativewind'
 import { router } from 'expo-router'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
-import { themeStore } from '@/store/storeTheme'
 
-// Icons (using text fallbacks — swap with lucide-react-native or @expo/vector-icons if available)
 const Icon = ({ label }: { label: string }) => (
   <Text className="text-lg">{label}</Text>
 )
@@ -20,20 +18,13 @@ export default function Profile() {
   const token = useTokenSync()
   const decodedToken: any = token ? jwtDecode(token) : null
 
- 
+ const { colorScheme, toggleColorScheme } = useColorScheme();
 
- const [isDark, setIsDark] = React.useState(themeStore.getState().isDark)
+const isDark = colorScheme === 'dark';
 
- console.log(isDark ? "Dark mode is enabled" : "Light mode is enabled");
-
-  const toggleColorScheme = () => 
-    {
-      setIsDark((prev) => !prev)
-    themeStore.getState().toggleTheme()
-  }
+  console.log(isDark ? 'Dark mode is enabled' : 'Light mode is enabled');
 
 
- 
 
   const handleLogout = () => {
    
@@ -115,9 +106,9 @@ function Divider() {
         transition={{ type: 'timing', duration: 500, delay: 200 }}
         className="bg-input-light/80 dark:bg-input-dark rounded-2xl px-5 py-4 mb-4 gap-y-4"
       >
-        <InfoRow icon={<MaterialIcons name="email" size={20} color={isDark ? "#999" : "#010111"} />}  label="Email" value={email} />
+        <InfoRow icon={<MaterialIcons name="email" size={20} color={isDark ? "#999" : "#777"} />}  label="Email" value={email} />
         <Divider />
-        <InfoRow icon={<MaterialIcons name="badge" size={20} color={isDark ? "#999" : "#010111"} />} label="Role" value={role} />
+        <InfoRow icon={<MaterialIcons name="badge" size={20} color={isDark ? "#999" : "#777"} />} label="Role" value={role} />
      
       </MotiView>
 
@@ -130,7 +121,7 @@ function Divider() {
       >
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-x-3">
-        <MaterialIcons name="dark-mode" size={20} color={isDark ? "#999" : "#010111"} />
+        <MaterialIcons name="dark-mode" size={20} color={isDark ? "#999" : "#777"} />
             <View>
               <Text className="text-base font-l-semibold text-light-title dark:text-dark-title">
                 Dark Mode
@@ -159,7 +150,7 @@ function Divider() {
         <TouchableOpacity
           onPress={handleLogout}
           activeOpacity={0.8}
-          className="bg-red-500/10 border border-red-400 rounded-2xl px-5 py-4 flex-row items-center justify-center gap-x-2"
+          className="bg-red-500/10  rounded-2xl px-5 py-4 flex-row items-center justify-center gap-x-2"
         >
        <MaterialIcons name="logout" size={20} color="#ef4444" />
           <Text className="text-red-500 font-l-semibold text-base">Logout</Text>

@@ -25,6 +25,7 @@ export default postRequest;
 
 
 export  function getRequest(url: string, headers?: object) {
+    
     return fetch(url, {
         method: 'GET',
         headers: {

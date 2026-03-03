@@ -1,17 +1,17 @@
-import { getTokenAsync, toggleSign, useTokenSync } from "@/config/store.functions";
+
 import { ToastProvider } from "@/hooks/useToast";
+import { setupCloudMessaging } from "@/services/notificationService";
+import { useAuthStore } from "@/store/store";
+
 import { useFonts } from "expo-font";
-import { Stack, useFocusEffect } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+
 import React, { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "../global.css";
-import { themeStore } from "@/store/storeTheme";
-import { useColorScheme as useNativeWind} from "nativewind";
-import { toAndFroStore } from "@/store/toandfro";
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export const unstable_settings = {
   anchor: "(protected)",
@@ -27,63 +27,65 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+const askNotificationPermission = async () => {
+  try {
+   setupCloudMessaging();
+  } catch (error) {
+    console.error("Error setting up cloud messaging:", error);
+  }
+}
+
+askNotificationPermission();
+    
+  }, []);
+
+  useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
 
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
- const isSigned = toAndFroStore.getState().isSignIn;
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-         await getTokenAsync();
-const token = useTokenSync();
- 
+const token = useAuthStore((state) => state.token);
 
-        if (token) {
-          setIsAuthenticated(true);
-          toggleSign();
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        setIsAuthenticated(false);
-      }
-    };
+const getToken =useAuthStore((state) => state.getToken);
 
-    checkAuthentication();
-  }, [isSigned]);
+const hasToken = Boolean(token) 
 
-   const { setColorScheme } = useNativeWind();
-  const isDark = themeStore((state) => state.isDark);
+useEffect(() => {
+  if (!hasToken) {
+    getToken();
+  }
+}, [hasToken, getToken]);
 
-  useEffect(() => {
-    setColorScheme(isDark ? "dark" : "light");
-  }, [isDark]);
+   
+
+
+
+
+
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <ToastProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-          animation: "fade",
-        }}
-      />
-        <Stack.Protected guard={isAuthenticated}>
-          <Stack.Screen name="(protected)" options={{ headerShown: false }} />
-        </Stack.Protected>
-        <Stack.Screen name="(unprotected)" options={{ headerShown: false }} />
+      <ToastProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen
+            name="index"
+            options={{
+              headerShown: false,
+              animation: "fade",
+            }}
+          />
+          <Stack.Protected guard={hasToken}>
+            <Stack.Screen name="(protected)" options={{ headerShown: false }} />
+          </Stack.Protected>
+          <Stack.Screen name="(unprotected)" options={{ headerShown: false }} />
 
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ToastProvider>
+          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </ToastProvider>
     </GestureHandlerRootView>
   );
 }

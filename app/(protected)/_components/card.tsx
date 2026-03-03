@@ -10,6 +10,9 @@ import React from "react";
 import { useToast } from "@/hooks/useToast";
 import { setBookMarks } from "@/config/store.functions";
 import { Bookmark } from "@/utils/protected/types";
+import { themeStore } from "@/store/storeTheme";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
 interface CardProps {
     title: string;
@@ -49,77 +52,107 @@ const [isBookmarked, setIsBookmarked] = React.useState<boolean>(false)
 const {showToast} = useToast()
 
 
-const addBookmark = (courseId: string) => {
-    try {
-        storage.set(`bookmark_${courseId}`, JSON.stringify({
-            id: courseId,
-            title,
-            header: header || "",
-            tutorName: tutorName || "",
-            rating: rating || 0,
-            description,
-            price,
-            thumbnailUrl,
+// const addBookmark = (courseId: string) => {
+//     try {
+//         storage.set(`bookmark_${courseId}`, JSON.stringify({
+//             id: courseId,
+//             title,
+//             header: header || "",
+//             tutorName: tutorName || "",
+//             rating: rating || 0,
+//             description,
+//             price,
+//             thumbnailUrl,
           
-        }))
-        setIsBookmarked(true)
-        showToast("Course added to bookmarks", "success")
-    } catch (error) {
-          console.error("Error adding bookmark:", error);   
-    }
+//         }))
+//         setIsBookmarked(true)
+//         showToast("Course added to bookmarks", "success")
+//     } catch (error) {
+//           console.error("Error adding bookmark:", error);   
+//     }
 
-}
+// }
 
-const checkBookmark = (courseId: string) => {
-    try {
-        const bookmark = storage.getString(`bookmark_${courseId}`)
-        console.log("Checking bookmark for courseId:", courseId, "Found bookmark:", bookmark)
-        if (bookmark) {
-            const parsedBookmark = JSON.parse(bookmark)
-          {
-            parsedBookmark.header === header && setIsBookmarked(true)
-           }
-           console.log("Parsed bookmark:", parsedBookmark)
+// const checkBookmark = (courseId: string) => {
+//     try {
+//         const bookmark = storage.getString(`bookmark_${courseId}`)
+//         console.log("Checking bookmark for courseId:", courseId, "Found bookmark:", bookmark)
+//         if (bookmark) {
+//             const parsedBookmark = JSON.parse(bookmark)
+//           {
+//             parsedBookmark.header === header && setIsBookmarked(true)
+//            }
+//            console.log("Parsed bookmark:", parsedBookmark)
+//        const alreadyBookmarked = current.some((item: Bookmark) => item.id === courseId && item.header === header)
+//      if(!alreadyBookmarked){
+//     setBookMarks([...current, {
+//         id: courseId,
+//         title,
+//         header: header || "",
+//         tutorName: tutorName || "",
+//         rating: rating || 0,
+//         description,
+//         price,
+//         thumbnailUrl,
+      
+//     }])
+//  }
+ 
+//         } else {
+//             setIsBookmarked(false)     
+//             }
+//     } catch (error) {
+//           console.error("Error checking bookmark:", error);   
+//     }
+// }
 
-           setBookMarks([...current, parsedBookmark]);
-        } else {
-            setIsBookmarked(false)     
-            }
-    } catch (error) {
-          console.error("Error checking bookmark:", error);   
-    }
-}
-
-React.useEffect(()=>{
+// React.useEffect(()=>{
    
-    checkBookmark(id.toString())
-},[])
+//     checkBookmark(id.toString())
+// },[])
 
 
-const removeBookmark = (courseId: string) => {
-    try {
-        storage.remove(`bookmark_${courseId}`)
-        setIsBookmarked(false)
-        showToast("Course removed from bookmarks", "info")
-    } catch (error) {
-          console.error("Error removing bookmark:", error);   
-    }
+// const removeBookmark = (courseId: string) => {
+//     try {
+//         storage.remove(`bookmark_${courseId}`)
+//         setIsBookmarked(false)
+//         showToast("Course removed from bookmarks", "info")
+//     } catch (error) {
+//           console.error("Error removing bookmark:", error);   
+//     }
 
+async function sendNotificationToUser(token: string, title: string, body: string, data?: any) {
+  try {
+    const res = await fetch('/api/send-push', {   // ← relative URL works in dev & prod
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expoPushToken: "ExponentPushToken[GefJyYErRDt5it-NbZ3382]", title, body, data }),
+    });
+    console.log("Push response:", res);
+
+    if (!res.ok) throw new Error('Failed');
+
+    console.log('Notification sent!');
+ } catch (err) {
+    console.error('Send failed', err);
+  }
 }
 
-
-
+const router = useRouter()  
 
     return (
 
-   <Animated.View key={index}
-   
+   <TouchableOpacity key={index}
+   onPress={async ()=>{
+    router.push(`/enrollmentPage?image=${"https://picsum.photos/200/300"}&title=${title}&description=${description}&price=${price}&tutorName=${            tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last)  || "Unknown Tutor"}&rating=${rating}&id=${id}`)
+    // await sendNotificationToUser("ExponentPushToken[GefJyYErRDt5it-NbZ3382]", "Course Selected", `You selected the course: ${title}`, { courseId: id })
+   }}
    style={{
     width: isHorizontal ? width - 100 :"100%", 
     height: 300,
         marginRight: isHorizontal ? 10 : 0,
    }}
-   className=" flex-1    flex-col  mb-2  rounded-xl bg-light/50 dark:bg-dark border-[0.2px] border-gray-500 overflow-hidden " >
+   className=" flex-1    flex-col  mb-2  rounded-xl bg-light/50 dark:bg-gray-900 border-[0.2px] border-gray-500 overflow-hidden " >
    
      <Image
          source={{ uri: "https://picsum.photos/200/300" }} 
@@ -127,13 +160,8 @@ const removeBookmark = (courseId: string) => {
           style={{ width: "100%", height: "60%", marginVertical:"auto" }}
         />
 
-   <TouchableOpacity
-    onPress={ ()=>  isBookmarked ? removeBookmark(id.toString()) : addBookmark(id.toString())}
-    className="absolute top-2 right-2 px-1 py-0.5 rounded " >
-     <MaterialIcons name={isBookmarked ? "bookmark" : "bookmark-border"} size={24}  color = { isBookmarked ? "#0ea5e9" : "white"} />
+
     
-     
-    </TouchableOpacity>
     
         <View className="flex-1 px-3 py-2 justify-between">
             <View className="px-1">
@@ -165,17 +193,16 @@ const removeBookmark = (courseId: string) => {
                     </View>
                 )  }
 
-                  <Text
-            
-                className="text-sm   overflow-hidden font-l-semibold text-light-body dark:text-dark-body ">
-               By :  {tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last)  || "Unknown Tutor"}
+                  <Text className="text-sm  justify-center items-center gap-2  overflow-hidden font-l-semibold text-light-body dark:text-dark-body ">
+
+            {tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last)  || "Unknown Tutor"}
                 </Text>
 
             </View>
                 </View>
 
                  
-   </Animated.View>
+   </TouchableOpacity>
 
     )
 }

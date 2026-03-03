@@ -7,6 +7,7 @@ export const LoginSchema = z.object({
 });
 
 export const RegisterSchema = z.object({
+    
     username: z.string().min(3),
  password: z.string().min(8)
  .refine((val) => /[A-Z]/.test(val), "Password must contain at least one uppercase letter")

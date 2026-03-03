@@ -15,6 +15,7 @@ export default function index() {
 
 const router = useRouter();
 const isFirstLaunchDone = storage.getBoolean('isFirstLaunch')
+console.log("Is first launch done?", isFirstLaunchDone)
 const [target, setTarget] = React.useState<string | null>(null)
 
 const navigate =async()=>
@@ -34,9 +35,7 @@ const navigate =async()=>
 
 
  useEffect(() => {
-    if (!isFirstLaunchDone) {
-      storage.set('isFirstLaunch', true)
-    }
+
   setTimeout(() => {
     navigate();
   }, 1500);
@@ -44,7 +43,7 @@ const navigate =async()=>
 
   }, [])
 
-  if (target !== null) {
+  if (target !== null && isFirstLaunchDone !== undefined) {
     return <Redirect href={`/${target}`} />;
   }
 
@@ -91,6 +90,7 @@ const navigate =async()=>
       <Button
         label="Get Started"
         onPress={() => {
+              storage.set('isFirstLaunch', true) 
       router.replace("/register");
         }}
         
@@ -102,7 +102,9 @@ const navigate =async()=>
    {
     !isFirstLaunchDone && (    <MotiText
     onPress={() => {
+        storage.set('isFirstLaunch', true)
       router.replace("/signin");
+          
     }}
     style={{
       textDecorationLine: 'underline',

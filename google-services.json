@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "840991571656",
+    "project_id": "eduz-5c1c4",
+    "storage_bucket": "eduz-5c1c4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840991571656:android:61021d3e85e26742d2affd",
+        "android_client_info": {
+          "package_name": "com.abhip.EduZ"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4gVRj2dWWR29Xucij_0G0cId2ARKNCaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

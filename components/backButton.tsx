@@ -2,7 +2,6 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { MotiView } from 'moti'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
-import { themeStore } from '@/store/storeTheme'
 import { useRouter } from 'expo-router'
 
 export default function BackButton({onPress}: {onPress?: () => void}) {
@@ -17,8 +16,9 @@ export default function BackButton({onPress}: {onPress?: () => void}) {
         }
     }}
     style={{
-        width: 40,
-        height: 40,
+        width: 35,
+        height: 35,
+        margin: 10,
         padding:"auto",
        alignItems: 'center',
        borderRadius: 20,

@@ -20,7 +20,7 @@ export default function HorizontalList({
    }} className="w-full " >
 
 
-<Text className="font-l-semibold  text-lg dark:text-gray-200 mb-2 px-3">{header}</Text>
+<Text className="font-l-semibold  text-lg dark:text-gray-200 mb-4 px-2">{header}</Text>
 
     <LegendListComponent
     header={header} 

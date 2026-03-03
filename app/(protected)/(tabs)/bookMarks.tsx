@@ -11,7 +11,7 @@ export default function bookMarks() {
   
   const BookMarks = coursesStore.getState().getBookMarks();
  
-console.log("Bookmarks in bookMarks screen:", BookMarks)
+console.log("`Bookmarks in bookMarks screen:`", BookMarks)
   return (
     <View className='bg-light dark:bg-dark flex-1 '>
       <Bg  />
@@ -21,6 +21,8 @@ console.log("Bookmarks in bookMarks screen:", BookMarks)
       <View className="flex-1 items-center justify-center" >
     <LegendListComponent
     data={BookMarks}
+    refreshing={false}  
+    onRefresh={() => {}}
     numberOfItems={BookMarks.length}
     isHorizontal={false}
     header={"Bookmarked Courses"}

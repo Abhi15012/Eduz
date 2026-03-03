@@ -42,15 +42,18 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterInput) => {
     try {
-      console.log(data, "register data");
+
       const res = await useRegister(data);
       console.log(res);
       if (res.success) {
         showToast("Registered successfully!", "success");
         router.replace("/signin");
       } else {
+
+        // {"data": null, "errors": [{"username": "Username must be lowercase"}], "message": "Received data is not valid", "statusCode": 422, "success": false}
+        // 
         showToast(
-          res.message ||
+           res.errors?.[0]?.username || res.message  ||
             "Failed to register. Please check your credentials and try again.",
           "error",
         );

@@ -2,9 +2,10 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { MotiView } from "moti";
 import { BlurView } from "expo-blur";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useWindowDimensions } from "react-native";
+import { Platform, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
  import { View, Text } from "react-native";
+import { useColorScheme } from "nativewind";
 type ToastType = "success" | "error" | "warn" | "info";
 
 interface ToastContextProps {
@@ -23,6 +24,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [type, setType] = useState<ToastType>("info");
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+   const { colorScheme } = useColorScheme();
+   const isDark = colorScheme === 'dark';
 
   const showToast = (msg: string, toastType: ToastType = "info", duration: number = 3000) => {
     setMessage(msg);
@@ -30,6 +33,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     setVisible(true);
     setTimeout(() => setVisible(false), duration);
   };
+
+
 
   const getIcon = () => {
     switch (type) {
@@ -58,7 +63,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             left: (width - width * 0.65) / 2,
             minHeight: 50,
             borderWidth: 1,
-            borderColor: "rgba(255, 255, 255, 0.2)",
+            borderColor: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.2)",
+            backgroundColor:  isDark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.9)",
             borderRadius: 25,
             overflow: "hidden",
             elevation: 5, 
@@ -69,8 +75,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           }}
         >
           <BlurView
-            intensity={90}
-            tint="default"
+            intensity={Platform.OS === "ios" ? 90 : 100}
+            tint={isDark ? 'dark' : 'light'}
            
             className="flex-1 flex-row items-center justify-center px-4 py-2 gap-x-2 bg-white/70 dark:bg-black/60"
           >
@@ -79,7 +85,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             <Text
               numberOfLines={2}
        
-              className="text-sm font-l-regular text-left dark:text-dark-title text-black flex-shrink"
+              className="text-sm font-l-regular text-left dark:text-white text-black flex-shrink"
             >
               {message}
             </Text>
