@@ -1,53 +1,42 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { BlurView } from "expo-blur";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { MotiView } from "moti";
-import React, { createContext, ReactNode, useContext, useState } from "react";
-import { Platform, Text, useWindowDimensions, View } from "react-native";
+import { BlurView } from "expo-blur";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+ import { View, Text } from "react-native";
+type ToastType = "success" | "error" | "warn" | "info";
 
-
-type ToastType = "success" | "error" | "info" | "warn";
-
-type ToastContextType = {
+interface ToastContextProps {
   showToast: (message: string, type?: ToastType, duration?: number) => void;
-};
+}
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined);
+const ToastContext = createContext<ToastContextProps>({
+  showToast: () => {},
+});
+
+export const useToast = () => useContext(ToastContext);
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [type, setType] = useState<ToastType>("info");
   const { width } = useWindowDimensions();
-
-
-
   const insets = useSafeAreaInsets();
 
-  const showToast = (
-    msg: string,
-    toastType: ToastType = "info",
-    duration: number = 3000
-  ) => {
+  const showToast = (msg: string, toastType: ToastType = "info", duration: number = 3000) => {
     setMessage(msg);
     setType(toastType);
     setVisible(true);
-
-    setTimeout(() => {
-      setVisible(false);
-    }, duration);
+    setTimeout(() => setVisible(false), duration);
   };
 
   const getIcon = () => {
     switch (type) {
-      case "success":
-        return <MaterialIcons name="check-circle" size={20} color="#4BB543" />;
-      case "error":
-        return <MaterialIcons name="error" size={20} color="#FF3333" />;
-      case "warn":
-        return <MaterialIcons name="warning" size={20} color="#FFCC00" />;
-      default:
-        return <MaterialIcons name="info" size={20} color="#3399FF" />;
+      case "success": return <MaterialIcons name="check-circle" size={20} color="#4BB543" />;
+      case "error": return <MaterialIcons name="error" size={20} color="#FF3333" />;
+      case "warn": return <MaterialIcons name="warning" size={20} color="#FFCC00" />;
+      default: return <MaterialIcons name="info" size={20} color="#3399FF" />;
     }
   };
 
@@ -57,49 +46,40 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
       {visible && (
         <MotiView
-          from={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: "spring", duration: 300 }}
-          style={{ top: insets.top + 50 ,
+          from={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          exit={{ opacity: 0, translateY: -20 }}
+          transition={{ type: "spring", damping: 40, stiffness: 500 }}
+          style={{
+            top: insets.top + 20, 
             position: "absolute",
-           
-             zIndex: 9999,
-             alignItems: "center",
-             width: width * 0.6,
-             left : (width - width * 0.6) / 2,
-             height: 50,
-          
-             alignSelf:"center",
-             borderWidth:  1,
-             borderColor: "rgba(255, 255, 255, 0.3)",
-             borderRadius: 25,
-             overflow: "hidden",    
-              
+            zIndex: 9999,
+            width: width * 0.65, 
+            left: (width - width * 0.65) / 2,
+            minHeight: 50,
+            borderWidth: 1,
+            borderColor: "rgba(255, 255, 255, 0.2)",
+            borderRadius: 25,
+            overflow: "hidden",
+            elevation: 5, 
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
           }}
-         
         >
-         <BlurView
-  intensity={90}
-  tint="default"
-  className=" 
-  flex-row items-center
-             dark:bg-black/60 dark:border-white/20 
-              absolute top-0 left-0 right-0 bottom-0 
-              w-full h-full
-              
-             gap-x-2 
-             space-x-2
-             bg-white/70 border-gray-300"
->
-            <View className="mx-3" >{getIcon()}</View>
-
+          <BlurView
+            intensity={90}
+            tint="default"
+           
+            className="flex-1 flex-row items-center justify-center px-4 py-2 gap-x-2 bg-white/70 dark:bg-black/60"
+          >
+            <View>{getIcon()}</View>
 
             <Text
               numberOfLines={2}
-
-              
-              className="  text-sm w-3/4 font-l-regular text-center dark:text-dark-body text-light-body"
+       
+              className="text-sm font-l-regular text-left dark:text-dark-title text-black flex-shrink"
             >
               {message}
             </Text>
@@ -108,12 +88,4 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       )}
     </ToastContext.Provider>
   );
-};
-
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within ToastProvider");
-  }
-  return context;
 };

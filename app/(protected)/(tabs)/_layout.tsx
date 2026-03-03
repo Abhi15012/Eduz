@@ -1,7 +1,7 @@
 // app/_layout.tsx
 import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tabs, useRouter } from 'expo-router';
 import Bg from '@/components/bg';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -66,12 +66,16 @@ const router = useRouter()
   }
 
 
+  const insets = useSafeAreaInsets()
 
 
 
     
   return (
-    <SafeAreaView className="flex-1 bg-light dark:bg-dark ">
+    <View style={{
+      paddingTop:  insets.top 
+    }} className="flex-1 bg-light dark:bg-dark ">
+
 
      {commonHeader()}
      
@@ -86,6 +90,7 @@ const router = useRouter()
           backgroundColor : 'rgba(255,255,255,0.15)',
              borderColor:  'rgba(0,0,0,0.2)',
                 borderWidth: 1,
+                bottom: insets.bottom ,
              position: 'absolute',
             borderTopWidth: 0,
             elevation: 7,
@@ -141,9 +146,22 @@ const router = useRouter()
                }}
                 
               />
+
+                     <Tabs.Screen name="bookMarks" options={{ headerShown: false,
+            tabBarLabel: "Bookmarks",
+            tabBarIcon: ({ focused }) => (
+                <MaterialIcons
+                    name="bookmark"
+                    size={24}
+                    color={focused ? '#0ea5e9' : '#9CA3AF'}
+                />
+             )
+               }}
+                
+              />
     
    
       </Tabs>
-    </SafeAreaView>
+    </View>
   );
 }

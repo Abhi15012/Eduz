@@ -16,6 +16,7 @@ export const themeStore =create<themeState> ((set, get)=>({
 
   toggleTheme : ()=>{
     const currentTheme =get().isDark
+    
     set({isDark : !currentTheme})
     storage.set("theme", JSON.stringify(!currentTheme))
   }

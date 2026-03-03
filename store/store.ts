@@ -33,13 +33,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ token: null });
         await SecureStore.deleteItemAsync('authToken');
     },
+    
+
+
 })
 )
 
-interface userData {
-    name: string;
-    email: string;
-     avatarUrl: string;
-}
+
+
+
 
 

@@ -1,6 +1,6 @@
 import { Button } from "@/components/appButton";
 import Bg from "@/components/bg";
-import { setToken } from "@/config/store.functions";
+import { setToken, toggleSign } from "@/config/store.functions";
 import { useToast } from "@/hooks/useToast";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,9 +48,10 @@ export default function Signin() {
       if (res.success) {
         showToast("Signed in successfully!", "success");
         setToken(res.data.accessToken);
-
+        toggleSign();
+        router.push("/list");
         reset();
-        router.replace("/(protected)/(tabs)/list")
+        
       } else {
         showToast(
           res.message ||
@@ -75,7 +76,7 @@ export default function Signin() {
 
   return (
     <SafeAreaView className="flex-1 p-5 justify-start items-center bg-light dark:bg-dark">
-      <Bg />
+      <Bg  />
 
       <Header />
 

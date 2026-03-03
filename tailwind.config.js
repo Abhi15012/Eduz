@@ -21,7 +21,7 @@ module.exports = {
          "light" : "#FFFFFF",
          "dark" : "#010111",
          "primary" : "#0ea5e9",
-         "input-light" : "#f3f4f6",
+         "input-light" : "#ffffff",
          "input-dark" : "#1f2937",
       },
 

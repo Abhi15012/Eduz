@@ -10,14 +10,6 @@ import { clearToken } from '@/config/store.functions'
 
 const { width } = Dimensions.get('window')
 
-// ── Retention reasons shown as chips ────────────────────────────────────────
-const PERKS = [
-  { icon: '⚡', text: 'Instant sync across devices' },
-  { icon: '🔒', text: 'Your data stays private & secure' },
-  { icon: '🎯', text: 'Personalised just for you' },
-  { icon: '🌙', text: 'Dark mode & custom themes' },
-]
-
 export default function Logout() {
   const [confirming, setConfirming] = useState(false)
 

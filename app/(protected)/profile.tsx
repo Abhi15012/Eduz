@@ -1,14 +1,15 @@
 import { View, Text, TouchableOpacity, Switch } from 'react-native'
-import React from 'react'
+import React, { use, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/backButton'
 import Bg from '@/components/bg'
 import { useTokenSync } from '@/config/store.functions'
 import { MotiView } from 'moti'
 import { jwtDecode } from 'jwt-decode'
-import { useColorScheme } from 'nativewind'
+import { useColorScheme as useNativeWind } from 'nativewind'
 import { router } from 'expo-router'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+import { themeStore } from '@/store/storeTheme'
 
 // Icons (using text fallbacks — swap with lucide-react-native or @expo/vector-icons if available)
 const Icon = ({ label }: { label: string }) => (
@@ -19,20 +20,54 @@ export default function Profile() {
   const token = useTokenSync()
   const decodedToken: any = token ? jwtDecode(token) : null
 
-  const { colorScheme, toggleColorScheme } = useColorScheme()
-  const isDark = colorScheme === 'dark'
+ 
+
+ const [isDark, setIsDark] = React.useState(themeStore.getState().isDark)
+
+ console.log(isDark ? "Dark mode is enabled" : "Light mode is enabled");
+
+  const toggleColorScheme = () => 
+    {
+      setIsDark((prev) => !prev)
+    themeStore.getState().toggleTheme()
+  }
+
+
+ 
 
   const handleLogout = () => {
    
     router.push('/logout')
   }
-
-  // Pull common JWT fields — adjust keys to match your token shape
-  const name: string = decodedToken?.name ?? decodedToken?.username ?? 'Unknown'
+ const name: string = decodedToken?.name ?? decodedToken?.username ?? 'Unknown'
   const email: string = decodedToken?.email ?? '—'
   const role: string = decodedToken?.role ?? '—'
   const userId: string = decodedToken?.sub ?? decodedToken?.id ?? '—'
 
+
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <View className="flex-row items-center justify-between">
+      <View className="flex-row items-center gap-x-3">
+        <Text className="text-base">{icon}</Text>
+        <Text className="text-light-subtitle dark:text-dark-subtitle font-l-regular text-sm">
+          {label}
+        </Text>
+      </View>
+      <Text
+        className="text-light-title dark:text-dark-title font-l-medium text-sm max-w-[55%] text-right"
+        numberOfLines={1}
+        ellipsizeMode="middle"
+      >
+        {value}
+      </Text>
+    </View>
+  )
+}
+
+function Divider() {
+  return <View className="h-px bg-gray-200 dark:bg-gray-700 -mx-1" />
+}
   const initials = name
     .split(' ')
     .map((w: string) => w[0])
@@ -134,27 +169,3 @@ export default function Profile() {
   )
 }
 
-
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <View className="flex-row items-center justify-between">
-      <View className="flex-row items-center gap-x-3">
-        <Text className="text-base">{icon}</Text>
-        <Text className="text-light-subtitle dark:text-dark-subtitle font-l-regular text-sm">
-          {label}
-        </Text>
-      </View>
-      <Text
-        className="text-light-title dark:text-dark-title font-l-medium text-sm max-w-[55%] text-right"
-        numberOfLines={1}
-        ellipsizeMode="middle"
-      >
-        {value}
-      </Text>
-    </View>
-  )
-}
-
-function Divider() {
-  return <View className="h-px bg-gray-200 dark:bg-gray-700 -mx-1" />
-}
