@@ -2,52 +2,59 @@ import { usePushTokenStore } from "@/store/pushTokenStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import {
-    Dimensions,
-    Text,
-    TouchableOpacity,
-    View
-} from "react-native";
-import Animated, {
-    FadeInUp
-} from "react-native-reanimated";
+import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 
 interface AdBannerProps {
   onPress?: () => void;
 }
 
-
- async function sendNotificationToUser(
-    token: string,
-    title: string,
-    body: string,
-    data?: any,
-  ) {
-    try {
-      console.log("Sending notification with token:", token);
-      const res = await fetch("/api/send-push", {
-
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expoPushToken: token,
-          title,
-          body,
-          data,
-        }),
-      });
-      console.log("Push response:", res);
-
-      if (!res.ok) throw new Error("Failed");
-
-      console.log("Notification sent!");
-    } catch (err) {
-      console.error("Send failed", err);
-    }
+async function sendNotificationToUser(
+  token: string,
+  title: string,
+  body: string,
+  data?: any
+) {
+  if (!token) {
+    console.error("No push token available");
+    return;
   }
+
+  try {
+    console.log("Sending notification with token:", token);
+
+    const res = await fetch("/api/send-push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        expoPushToken: token,
+        title,
+        body,
+        data,
+         channelId: "urgent"
+      }),
+    });
+
+    const result = await res.json();
+
+    console.log("Push response:", result);
+
+    if (!res.ok) {
+      throw new Error("Push failed");
+    }
+
+    console.log("Notification sent!");
+  } catch (err) {
+    console.error("Send failed", err);
+  }
+}
 
 export function PremiumCourseBanner({ onPress }: AdBannerProps) {
   const { width } = Dimensions.get("window");
+
+  console.log("Current push token:", usePushTokenStore.getState().expoPushToken);
 
   return (
     <Animated.View
@@ -63,9 +70,16 @@ export function PremiumCourseBanner({ onPress }: AdBannerProps) {
           overflow: "hidden",
         }}
       >
-        <TouchableOpacity onPress={async ()=>{
-          await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Premium Course", "You clicked on the Premium Course banner!"); 
-        }} activeOpacity={0.8}>
+        <TouchableOpacity
+          onPress={async () => {
+            await sendNotificationToUser(
+               usePushTokenStore.getState().expoPushToken ?? "",
+              "Premium Course",
+              "You clicked on the Premium Course banner!",
+            );
+          }}
+          activeOpacity={0.8}
+        >
           <View className="p-6 flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-white font-l-bold text-lg mb-1">
@@ -91,6 +105,7 @@ export function PremiumCourseBanner({ onPress }: AdBannerProps) {
   );
 }
 
+
 export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
   const { width } = Dimensions.get("window");
 
@@ -108,9 +123,16 @@ export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
           overflow: "hidden",
         }}
       >
-        <TouchableOpacity onPress={async ()=>{
-          await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Skill Mastery 50% Off", "You clicked on the Skill Mastery 50% Off banner!"); 
-        }} activeOpacity={0.8}>
+        <TouchableOpacity
+          onPress={async () => {
+            await sendNotificationToUser(
+              usePushTokenStore.getState().getExpoPushToken() ?? "",
+              "Skill Mastery 50% Off",
+              "You clicked on the Skill Mastery 50% Off banner!",
+            );
+          }}
+          activeOpacity={0.8}
+        >
           <View className="p-6">
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-1">
@@ -150,8 +172,12 @@ export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
             </View>
 
             <TouchableOpacity
-              onPress={async ()=>{
-                await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Skill Mastery 50% Off", "You clicked on the Skill Mastery 50% Off banner!"); 
+              onPress={async () => {
+                await sendNotificationToUser(
+                  usePushTokenStore.getState().getExpoPushToken() ?? "",
+                  "Skill Mastery 50% Off",
+                  "You clicked on the Skill Mastery 50% Off banner!",
+                );
               }}
               className="bg-white/95 rounded-full py-2 flex-row items-center justify-center"
             >
@@ -170,15 +196,10 @@ export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
 export function AdBannerCarousel() {
   const { width } = Dimensions.get("window");
 
-    const handlePress = async (offerType: string) => {  
-      console.log(`Banner pressed: ${offerType}`);
-      await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Special Offer", `You clicked on the ${offerType} banner!`);
-    };
-    
   return (
     <View className="flex-1">
-      <PremiumCourseBanner  />
-     <SkillMastery50OffBanner />
+      <PremiumCourseBanner />
+      <SkillMastery50OffBanner />
     </View>
   );
 }

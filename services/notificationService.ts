@@ -13,13 +13,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-function handleRegistrationError(errorMessage: string) {
-  console.error(errorMessage);
-}
-
-export async function registerForPushNotificationsAsync(): Promise<
-  string | undefined
-> {
+export async function registerForPushNotificationsAsync() {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("urgent", {
       name: "urgent",
@@ -27,11 +21,11 @@ export async function registerForPushNotificationsAsync(): Promise<
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7C",
     });
-  }
 
-  if (!Device.isDevice) {
-    console.warn("Must use physical device for push notifications");
-    return;
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -43,9 +37,7 @@ export async function registerForPushNotificationsAsync(): Promise<
   }
 
   if (finalStatus !== "granted") {
-    console.warn(
-      "Permission not granted to get push token for push notification!",
-    );
+    console.warn("Notification permission not granted");
     return;
   }
 
@@ -54,43 +46,35 @@ export async function registerForPushNotificationsAsync(): Promise<
     Constants?.easConfig?.projectId;
 
   if (!projectId) {
-    handleRegistrationError("Project ID not found");
+    console.error("Project ID not found");
     return;
   }
 
-  try {
-    const pushTokenString = (
-      await Notifications.getExpoPushTokenAsync({
-        projectId,
-      })
-    ).data;
+  const token = (
+    await Notifications.getExpoPushTokenAsync({
+      projectId,
+    })
+  ).data;
 
-    // Save the token to the store
-    usePushTokenStore.getState().setExpoPushToken(pushTokenString);
-    console.log("Expo Push Token:", pushTokenString);
+  usePushTokenStore.getState().setExpoPushToken(token);
 
-    return pushTokenString;
-  } catch (e: unknown) {
-    handleRegistrationError(`${e}`);
-  }
+  console.log("Expo Push Token:", token);
+
+  return token;
 }
 
-export async function setupCloudMessaging(): Promise<() => void> {
-  // Request permission and get the push token
+export async function setupCloudMessaging() {
   await registerForPushNotificationsAsync();
 
-  const notificationListener = Notifications.addNotificationReceivedListener(
-    (notification) => {
-      console.log("Notification received:", notification);
-    },
-  );
+  const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
+  console.log("FULL NOTIFICATION:", JSON.stringify(notification, null, 2));
+});
 
   const responseListener =
     Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log("Notification response:", response);
+      console.log("Notification clicked:", response);
     });
 
-  // Return cleanup function
   return () => {
     notificationListener.remove();
     responseListener.remove();

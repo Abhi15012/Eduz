@@ -111,7 +111,7 @@ export default function MyList() {
       ) : (
         <View className="flex-1 items-center justify-center">
           <Text className="text-light-subtitle dark:text-dark-subtitle text-lg">
-            No bookmarks found.
+            No enrolled courses found.
           </Text>
         </View>
       )}
