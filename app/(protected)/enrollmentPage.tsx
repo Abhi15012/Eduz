@@ -1,8 +1,12 @@
+import { Button } from "@/components/appButton";
 import BackButton from "@/components/backButton";
-import Bg from "@/components/bg";
-import { coursesStore } from "@/store/dataStore";
 
-import { Bookmark } from "@/utils/protected/types";
+import { storage } from "@/constants/storage";
+import { useToast } from "@/hooks/useToast";
+
+import { toAndFroStore } from "@/store/toandfro";
+
+
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
@@ -12,6 +16,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Dimensions,
+  Modal,
   SectionList,
   Text,
   TouchableOpacity,
@@ -30,7 +35,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 
 const AnimatedSectionList = Animated.createAnimatedComponent(SectionList);
 
@@ -56,7 +61,7 @@ function buildSections({
 }): Section[] {
   const sections: Section[] = [];
 
-  // 1 — Description
+
   if (description) {
     sections.push({
       title: "Description",
@@ -143,45 +148,58 @@ export default function EnrollmentPage() {
   const router = useRouter();
   const [isDark] =  useState(colorScheme === "dark");
 
-  const { title, description, price, tutorName, rating, id, image } =
+  const { title, description, price, tutorName, rating, id, image, header } =
     useLocalSearchParams<{
       title?: string;
       description?: string;
       price?: string;
       tutorName?: string;
       rating?: string;
+      header?: string;
       id?: string;
       image?: string;
     }>();
 
 
-  const bookmarks = coursesStore((s) => s.Bookmarks);
-  const setBookmarks = coursesStore((s) => s.setBookMarks);
+ 
 
-  const isBookmarked = useMemo(
-    () => bookmarks.some((b) => b.id === id),
-    [bookmarks, id],
-  );
+const [isBookMarked , setBookMarked] =useState(false)
+ console.log("Course ID from params:", typeof id );
+const checkBookmark = useCallback(() => {
+  if (!id) {
+    setBookMarked(false);
+    return;
+  }
+
+  const bookmarked = storage.getString(`bookmark-${id}-${header}`.trim());
+  console.log("Bookmarked value for course", id, ":", bookmarked);
+  const isSaved = Boolean(header) && bookmarked === header;
+  setBookMarked(isSaved);
+  
+}, [header, id]);
+
+React.useEffect(() => {
+  checkBookmark();
+}, [checkBookmark]);
 
   const toggleBookmark = useCallback(() => {
+    console.log("Toggling bookmark for course", id);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (isBookmarked) {
-      setBookmarks(bookmarks.filter((b) => b.id !== id));
+    if (isBookMarked) {
+     storage.remove(`bookmark-${id}-${header}`.trim())
+   toAndFroStore.getState().toggleBookmark()
+   console.log("Course", id, "removed from bookmarks");
+    setBookMarked(false)
     } else {
-      const newBookmark: Bookmark = {
-        id: id ?? "",
-        title: (title as string) ?? "",
-        description: (description as string) ?? "",
-        price: price ?? "0",
-        thumbnailUrl: (image as string) ?? "",
-        tutorName: (tutorName as string) ?? "",
-        rating: rating ? parseFloat(rating as string) : undefined,
-      };
-      setBookmarks([...bookmarks, newBookmark]);
+      console.log("Bookmarking course", id, "with header", header);
+        storage.set(`bookmark-${id}-${header}`.trim(), `${header}`) 
+        toAndFroStore.getState().toggleBookmark()
+        console.log("Course", id, "bookmarked");
+        setBookMarked(true)
     }
   }, [
-    isBookmarked,
-    bookmarks,
+
+
     id,
     title,
     description,
@@ -189,6 +207,8 @@ export default function EnrollmentPage() {
     image,
     tutorName,
     rating,
+    header,
+    isBookMarked,
   ]);
 
 
@@ -202,7 +222,6 @@ export default function EnrollmentPage() {
     [description, rating, tutorName],
   );
 
-  /* ---- Scroll-driven animations ---- */
   const scrollY = useSharedValue(0);
   const MAX_IMG_HEIGHT = 350;
 
@@ -239,9 +258,6 @@ export default function EnrollmentPage() {
   });
 
 
-  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(
-    null,
-  );
 
 
   const renderStars = (count: number) =>
@@ -318,7 +334,7 @@ export default function EnrollmentPage() {
     if (sectionTitle === "Instructor") {
       return (
         <TouchableOpacity          onPress={() => {
-            router.push(`/tutor?name=${item.name}&rating=${item.rating}&image=${"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80"}`);
+            router.replace(`/tutor?name=${item.name}&rating=${item.rating}&image=${"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80"}`);
           }}
           className={`mx-5 my-2 p-4 rounded-xl border ${isDark ? "bg-input-dark border-gray-700" : "bg-input-light border-gray-200"}`}
         >
@@ -394,6 +410,25 @@ export default function EnrollmentPage() {
     </View>
   );
 
+  const {showToast} =useToast()
+
+  const [purchased, setPurchased] = useState(false)
+
+
+
+
+  const buyNowHandler = () => {
+   try {
+    storage.set(`enrolled-${id?.trim()}-${header}`.trim(), `${header}`)
+    storage.remove(`bookmark-${id}-${header}`.trim())
+    setPurchased(true)
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+   } catch (error) {
+    console.error("Error saving enrollment data:", error);
+    showToast("Failed to enroll in the course. Please try again.", "error");
+   }
+  }
  
   return (
     <SafeAreaView className={`flex-1 ${isDark ? "bg-dark" : "bg-light"}`}>
@@ -408,14 +443,16 @@ export default function EnrollmentPage() {
       </Animated.View>
 
       <Animated.View
-        style={[headerButtonsAnim, { top: insets.top + 8, right: 16 }]}
+        style={[headerButtonsAnim, { top: insets.top + 20, right: 20 }]}
         className={`absolute z-50 p-2 rounded-full ${isDark ? "bg-white/30" : "bg-white/90"}`}
       >
-        <TouchableOpacity onPress={toggleBookmark}>
+        <TouchableOpacity onPress={() => {
+          toggleBookmark()
+        }}>
           <MaterialCommunityIcons
-            name={isBookmarked ? "bookmark" : "bookmark-outline"}
+            name={isBookMarked === true ? "bookmark" : "bookmark-outline"}
             size={22}
-            color={isBookmarked ? "#f59e0b" : isDark ? "#fff" : "#333"}
+            color={isBookMarked === true ? "#f59e0b" : isDark ? "#fff" : "#333"}
           />
         </TouchableOpacity>
       </Animated.View>
@@ -500,23 +537,59 @@ export default function EnrollmentPage() {
             </Text>
           </View>
 
-          <TouchableOpacity
-            className="px-5 py-3 rounded-lg bg-primary"
+  
+ <View className="w-2/3">
+
+          <Button
+            label="Buy Now"
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-     
-              router.push({
-                pathname: "/(protected)/content",
-                params: { id },
-              });
+              buyNowHandler()
             }}
-          >
-            <Text className="text-white text-base font-l-semibold">
-              Buy Now
-            </Text>
-          </TouchableOpacity>
+          />
+ </View>
         </View>
       </LinearGradient>
+
+
+      <Modal
+        visible={purchased}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPurchased(false)}
+      >
+        <LinearGradient
+          colors={["#34d399", "#059669"]}
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            className="w-full bg-white rounded-xl p-6 items-center"
+            style={{ maxWidth: 400 }}
+          >
+            <MaterialCommunityIcons name="check-circle" size={48} color="#34d399" />
+            <Text className="text-xl font-l-bold text-gray-800 mt-4">
+              Purchase Successful!
+            </Text>
+            <Text className="text-center text-gray-600 mt-2 mb-6">
+              You have successfully enrolled in the course. Click below to start learning!
+            </Text>
+           <View className="w-full">
+              <Button
+              label="Go to Course"
+              onPress={() => {
+                
+                router.replace(`/modules/content?title=${title}&id=${id}&tutorName=${tutorName}&rating=${rating}&header=${header}`);
+              }}
+              fullWidth= {true}
+            />
+           </View>
+          </View>
+        </LinearGradient>
+      </Modal>
     </SafeAreaView>
   );
 }

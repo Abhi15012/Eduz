@@ -1,10 +1,11 @@
 import { View, Text, Touchable, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { LegendList, LegendListRenderItemProps } from '@legendapp/list'
-import { CourseCard } from './card'
+import  CourseCard from './card'
 
 import { useRouter } from 'expo-router';
 import { Bookmark } from '@/utils/protected/types';
+import CourseCardSkeleton from './skeletorCard';
 
 interface Course {
   id: string;
@@ -60,7 +61,7 @@ const seeAll = [
 const router = useRouter()
 
   return (
-<View  className=" flex-1 flex-row " >
+<View  className="flex-1" >
       <LegendList
          keyExtractor={(item)=> item.id.toString()}
          horizontal={isHorizontal}
@@ -69,7 +70,7 @@ const router = useRouter()
     data={visibleItems}
  renderItem={({item, index}: LegendListRenderItemProps<Course | Bookmark>)=>(
     
-        item.id === "see-all" && isHorizontal=== true ? (
+         item.id === "see-all" && isHorizontal=== true ? (
             <TouchableOpacity 
           onPress={() => {
   router.push(
@@ -88,16 +89,15 @@ const router = useRouter()
         isHorizontal={isHorizontal}
         description={item.description}
         price={item.price}
-        thumbnailUrl={item?.thumbnail }
+        thumbnailUrl={item?.thumbnail || "https://picsum.photos/200/300"}
        rating={item.rating}
         index={index}
       />)
-    
-      )}
+  )}
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{padding:10}}
-   estimatedItemSize={100}
+   estimatedItemSize={320}
    recycleItems={true}
       />
 

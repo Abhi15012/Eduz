@@ -3,14 +3,15 @@ import { useTokenSync } from "@/config/store.functions";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, useRouter, usePathname } from "expo-router";
 import { MotiView } from "moti";
 import {  useColorScheme } from "nativewind";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
+
   View
 } from "react-native";
 import {
@@ -18,21 +19,13 @@ import {
   useSafeAreaInsets
 } from "react-native-safe-area-context";
 
-export default function _layout() {
-  const [header, setHeaderName] = React.useState<String>("Eduz");
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
+export   const commonHeader = ({header, router, isDark} : {header: string, router: any, isDark: boolean}) => {
+ 
 
-  const router = useRouter();
-  const commonHeader = () => {
+
     return (
       <MotiView
-        from={{ opacity: 0, translateY: -20 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{
-          type: "timing",
-          duration: 500,
-        }}
+      
         className="w-full h-50 px-4 justify-between items-center flex-row mb-4"
       >
         <View className="justify-start right-2 items-center flex-row ">
@@ -63,6 +56,15 @@ export default function _layout() {
     );
   };
 
+export default function _layout() {
+  const [header, setHeaderName] = React.useState<string >("Eduz");
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  const router = useRouter();
+
+  const pathName = usePathname();
+
   const insets = useSafeAreaInsets();
 
   const token = useTokenSync();
@@ -73,6 +75,16 @@ export default function _layout() {
     }
   }, [token]);
 
+  useEffect(() => {
+    if (pathName === "/list") {
+      setHeaderName("Eduz");
+    } else if (pathName === "/myList") {
+      setHeaderName("My Learning");
+    } else if (pathName === "/bookMarks") {
+      setHeaderName("Bookmarks");
+    }
+  }, [pathName]);
+
   return (
     <SafeAreaView
       style={{
@@ -80,7 +92,9 @@ export default function _layout() {
       }}
       className="flex-1 bg-light dark:bg-dark "
     >
-      {commonHeader()}
+     {
+        commonHeader({header, router, isDark})
+     }
 
       <Tabs
         initialRouteName="list"
@@ -156,7 +170,7 @@ export default function _layout() {
           name="myList"
           options={{
             headerShown: false,
-            tabBarLabel: "My Purchases",
+            tabBarLabel: "My Learning",
             tabBarIcon: ({ focused }) => (
               <MaterialIcons
                 name="shopping-cart"

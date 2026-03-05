@@ -1,11 +1,14 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, useColorScheme } from 'react-native'
 import React from 'react'
 import { MotiView } from 'moti'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useRouter } from 'expo-router'
+import { } from 'nativewind'
 
 export default function BackButton({onPress}: {onPress?: () => void}) {
     const router = useRouter()
+    const colorScheme = useColorScheme();
+    const isDark = colorScheme === "dark";
   return (
     <TouchableOpacity
     onPress={()=>{
@@ -22,14 +25,14 @@ export default function BackButton({onPress}: {onPress?: () => void}) {
         padding:"auto",
        alignItems: 'center',
        borderRadius: 20,
-       backgroundColor: "#0ea5e9"+"53",  
+       backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.4)",
        justifyContent: 'center',
     
     }}>
         <MaterialIcons
         name="chevron-left"
         size={26}
-        color="#fff"
+        color={isDark ? "#fff" : "#000"}
         />
 
     </TouchableOpacity>

@@ -23,7 +23,8 @@ export async function POST(request: Request) {
       body: body.body,
       data: body.data || {},
       priority: 'high',   
-      ttl: 3600,         
+      ttl: 3600,  
+      channelId: 'urgent',      
     };
 
     const response = await fetch('https://exp.host/--/api/v2/push/send', {

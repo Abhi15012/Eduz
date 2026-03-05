@@ -17,7 +17,7 @@ export default function HorizontalList({
    <MotiView style={{
     height: 390,
     flex:1
-   }} className="w-full " >
+   }} className="w-full mt-4 " >
 
 
 <Text className="font-l-semibold  text-lg dark:text-gray-200 mb-4 px-2">{header}</Text>

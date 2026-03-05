@@ -1,12 +1,12 @@
 import { set } from "zod";
 import { create } from "zustand";
-import { Bookmark } from "@/utils/protected/types";
 
 interface coursesState {
-    Bookmarks : Bookmark[]
+   
     tutors : [] 
-    setBookMarks : (data: Bookmark[])=> void
-    getBookMarks : ()=> Bookmark[]
+courses : []
+    setCourses : (data: [])=> void
+    getCourses : ()=> []
     setTutors : (data: [])=> void
     getTutors : ()=> []
   
@@ -15,11 +15,11 @@ interface coursesState {
 
 
 export const coursesStore =  create<coursesState>((set,get)=>({
-    Bookmarks : [],
+  
      tutors : [],
-    setBookMarks : (data)=> set({Bookmarks : data}),
-    getBookMarks : ()=> get().Bookmarks,
-   
+        courses : [],
+    setCourses : (data )=> set({courses : data}),
+    getCourses : ()=> get().courses,
     setTutors : (data )=> set({tutors : data}),
     getTutors : ()=> get().tutors
 

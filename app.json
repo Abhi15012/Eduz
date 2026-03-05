@@ -10,9 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.abhip.EduZ",
-      "googleServicesFile": "./GoogleService-Info.plist"
-
+      "bundleIdentifier": "com.abhip12.eduz"
     },
     "android": {
       "googleServicesFile": "./google-services.json",
@@ -24,12 +22,10 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.abhip.EduZ"
+      "package": "com.abhip12.eduz"
     },
     "web": {
-     
       "output": "server",
-
       "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
     },
@@ -48,20 +44,19 @@
         }
       ],
       "expo-secure-store",
-       "expo-notifications",
-   
-       [
+      "expo-notifications",
+      [
         "expo-build-properties",
         {
           "ios": {
             "useFrameworks": "static"
           },
-           "extraPods": [
-              {
-                "name": "React-Core",
-                "modular_headers": true
-              }
-            ]
+          "extraPods": [
+            {
+              "name": "React-Core",
+              "modular_headers": true
+            }
+          ]
         }
       ]
     ],
@@ -72,8 +67,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "04ab61c5-79fe-47fa-a20c-fea139098ee6"
+        "projectId": "d57b2614-8485-4d64-a614-30ba3a121195"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "owner": "ab_15012",
+    "updates": {
+      "url": "https://u.expo.dev/d57b2614-8485-4d64-a614-30ba3a121195"
     }
   }
 }

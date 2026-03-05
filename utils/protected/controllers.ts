@@ -4,6 +4,7 @@ import {  setTutors } from "@/config/store.functions";
 
 export const GET_PRODUCTS = async () => {
 const res = await getRequest(`${API_URL}${GET_COURSES}`);
+
 return res;
 
 }

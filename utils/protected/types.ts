@@ -3,7 +3,7 @@ export type Bookmark ={
   title: string;
   description: string;
   price: string | number;
-  thumbnailUrl: string;
+  thumbnail: string;
   tutorName?: string;
   rating?: number;
   header?: string;

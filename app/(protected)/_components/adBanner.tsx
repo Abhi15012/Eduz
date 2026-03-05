@@ -1,3 +1,4 @@
+import { usePushTokenStore } from "@/store/pushTokenStore";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -14,6 +15,36 @@ import Animated, {
 interface AdBannerProps {
   onPress?: () => void;
 }
+
+
+  async function sendNotificationToUser(
+    token: string,
+    title: string,
+    body: string,
+    data?: any,
+  ) {
+    try {
+      console.log("Sending notification with token:", token);
+      const res = await fetch("/api/send-push", {
+
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expoPushToken: token,
+          title,
+          body,
+          data,
+        }),
+      });
+      console.log("Push response:", res);
+
+      if (!res.ok) throw new Error("Failed");
+
+      console.log("Notification sent!");
+    } catch (err) {
+      console.error("Send failed", err);
+    }
+  }
 
 export function PremiumCourseBanner({ onPress }: AdBannerProps) {
   const { width } = Dimensions.get("window");
@@ -32,7 +63,9 @@ export function PremiumCourseBanner({ onPress }: AdBannerProps) {
           overflow: "hidden",
         }}
       >
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+        <TouchableOpacity onPress={async ()=>{
+          await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Premium Course", "You clicked on the Premium Course banner!"); 
+        }} activeOpacity={0.8}>
           <View className="p-6 flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-white font-l-bold text-lg mb-1">
@@ -58,71 +91,6 @@ export function PremiumCourseBanner({ onPress }: AdBannerProps) {
   );
 }
 
-export function HiringPartnersBanner({ onPress }: AdBannerProps) {
-  const { width } = Dimensions.get("window");
-
-  return (
-    <Animated.View
-      entering={FadeInUp.delay(400).duration(600)}
-      className="mx-4 mb-4"
-    >
-      <LinearGradient
-        colors={["#059669", "#10b981", "#34d399"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{
-          borderRadius: 10,
-          overflow: "hidden",
-        }}
-      >
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-          <View className="p-6">
-            <View className="flex-row items-start justify-between mb-4">
-              <View className="flex-1">
-                <Text className="text-white font-l-bold text-lg mb-1">
-                  Get Hired at Top Companies
-                </Text>
-                <Text className="text-white/80 font-l-regular text-xs mb-3">
-                  Learn from industry experts & land your dream job
-                </Text>
-              </View>
-              <View className="bg-white/20 rounded-full p-2">
-                <MaterialIcons name="work" size={24} color="white" />
-              </View>
-            </View>
-
-            {/* Partner logos placeholder */}
-            <View className="flex-row justify-between items-center mb-3">
-              <View className="bg-white/20 rounded-lg px-3 py-2 flex-1 mr-2">
-                <Text className="text-white font-l-bold text-xs text-center">
-                  Google
-                </Text>
-              </View>
-              <View className="bg-white/20 rounded-lg px-3 py-2 flex-1 mx-1">
-                <Text className="text-white font-l-bold text-xs text-center">
-                  Microsoft
-                </Text>
-              </View>
-              <View className="bg-white/20 rounded-lg px-3 py-2 flex-1 ml-2">
-                <Text className="text-white font-l-bold text-xs text-center">
-                  Amazon
-                </Text>
-              </View>
-            </View>
-
-            <View className="flex-row items-center">
-              <MaterialIcons name="star" size={14} color="#fbbf24" />
-              <Text className="text-white/90 font-l-semibold text-xs ml-1">
-                500+ placements in 2024
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </LinearGradient>
-    </Animated.View>
-  );
-}
-
 export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
   const { width } = Dimensions.get("window");
 
@@ -140,7 +108,9 @@ export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
           overflow: "hidden",
         }}
       >
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+        <TouchableOpacity onPress={async ()=>{
+          await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Skill Mastery 50% Off", "You clicked on the Skill Mastery 50% Off banner!"); 
+        }} activeOpacity={0.8}>
           <View className="p-6">
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-1">
@@ -180,7 +150,9 @@ export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
             </View>
 
             <TouchableOpacity
-              onPress={onPress}
+              onPress={async ()=>{
+                await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Skill Mastery 50% Off", "You clicked on the Skill Mastery 50% Off banner!"); 
+              }}
               className="bg-white/95 rounded-full py-2 flex-row items-center justify-center"
             >
               <Text className="text-red-600 font-l-bold text-sm mr-2">
@@ -198,16 +170,15 @@ export function SkillMastery50OffBanner({ onPress }: AdBannerProps) {
 export function AdBannerCarousel() {
   const { width } = Dimensions.get("window");
 
-  const handlePress = (bannerName: string) => {
-    console.log(`${bannerName} banner clicked`);
-    // Add navigation or action logic here
-  };
-
+    const handlePress = async (offerType: string) => {  
+      console.log(`Banner pressed: ${offerType}`);
+      await sendNotificationToUser(usePushTokenStore.getState().getExpoPushToken() || "", "Special Offer", `You clicked on the ${offerType} banner!`);
+    };
+    
   return (
     <View className="flex-1">
-      <PremiumCourseBanner onPress={() => handlePress("Premium")} />
-      <HiringPartnersBanner onPress={() => handlePress("Hiring Partners")} />
-      <SkillMastery50OffBanner onPress={() => handlePress("50% Off")} />
+      <PremiumCourseBanner  />
+     <SkillMastery50OffBanner />
     </View>
   );
 }

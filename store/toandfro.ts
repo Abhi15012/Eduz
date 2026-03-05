@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 interface ToAndFroState {
-    isSignIn :boolean;
-    toggleSign: () => void;
+    isBookMarked: boolean;
+    toggleBookmark: () => void;
 }
 
 
 export const toAndFroStore = create<ToAndFroState>((set) => ({
-    isSignIn: false,
-    toggleSign: () =>  set((state)=> ({isSignIn: !state.isSignIn})),
+    isBookMarked: false,
+    toggleBookmark: () =>  set((state)=> ({isBookMarked: !state.isBookMarked})),
 }));
-console.log("ToAndFro store initialized with isSignIn:", toAndFroStore.getState().isSignIn  ); // Debug log to confirm store initialization 
+console.log("ToAndFro Store initialized");

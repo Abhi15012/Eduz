@@ -7,16 +7,9 @@ export default function _layout() {
  <Stack screenOptions={{
   headerShown:false
 }}>
-  <Stack.Screen name={"list"} options={{headerShown:false,
-      animation: "slide_from_left"
-  }} />
-  <Stack.Screen name={"details"} options={{headerShown:false,
-      animation: "slide_from_right"
-  }} />
 
-  <Stack.Screen name={"content"} options={{headerShown:false,
-      animation: "slide_from_right"
-  }} />
+
+
 
     <Stack.Screen name={"profile"} options={{headerShown:false,
       animation: "slide_from_right"

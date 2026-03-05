@@ -48,7 +48,7 @@ export default function Signin() {
       if (res.success) {
         showToast("Signed in successfully!", "success");
         setToken(res.data.accessToken);
-        toggleSign();
+    
         router.push("/list");
         reset();
         

@@ -18,7 +18,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
     getToken: async () => {
         const token = await SecureStore.getItemAsync('authToken');
-     
+        if (!token) return ;
+
         set({ token });
     },
     useToken: async () => {

@@ -1,209 +1,185 @@
-import Animated from "react-native-reanimated";
-
-import { Dimensions, Image, TouchableOpacity, View } from "react-native";
-import { Text } from "react-native";
-import tutor from "../tutor";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { coursesStore } from "@/store/dataStore";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+
+import React, { useEffect } from "react";
+
 import { storage } from "@/constants/storage";
-import React from "react";
-import { useToast } from "@/hooks/useToast";
-import { setBookMarks } from "@/config/store.functions";
-import { Bookmark } from "@/utils/protected/types";
-import { themeStore } from "@/store/storeTheme";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import CourseCardSkeleton from "./skeletorCard";
 
 interface CardProps {
-    title: string;
-    id : number | string;
-    description: string;
-    price : string | number;
-    thumbnailUrl: string;
-    tutorName?: string;
-    isHorizontal?: boolean;
-    header ?: string;
-    rating?: number;
-        index: number;
+  title: string;
+  id: number | string;
+  description: string;
+  price: string | number;
+  thumbnailUrl: string;
+  tutorName?: string;
+  isHorizontal?: boolean;
+  header?: string;
+  rating?: number;
+  index: number;
 }
 
-export function CourseCard({ title, description, price, thumbnailUrl, tutorName, rating , index, isHorizontal, header, id }: CardProps) {
-console.log("Rendering card for course:", tutorName)
-const {width}= Dimensions.get("window")
- const tutors = coursesStore.getState().getTutors()
-const setRatingColor = (rating: number) => {
+export default function CourseCard({
+  title,
+  description,
+  price,
+  thumbnailUrl,
+  tutorName,
+  rating,
+  index,
+  isHorizontal,
+  header,
+  id,
+}: CardProps) {
+  const { width } = Dimensions.get("window");
+  const tutors = coursesStore.getState().getTutors() || [];
+  const isDataMissing = [title, description, price, thumbnailUrl, id].some(
+    (value) => value === null || value === undefined,
+  );
+  const setRatingColor = (rating: number) => {
     if (rating >= 4.5) {
-        return "#16a34a"; 
+      return "#16a34a";
     } else if (rating >= 3) {
-        return "#eab308"; 
+      return "#eab308";
     } else {
-        return "#dc2626";
+      return "#dc2626";
     }
-};
-
-const { getBookMarks, setBookMarks } = coursesStore.getState();
-
-const current = getBookMarks();
+  };
 
 
+  const [isPurchasedDone, setPurchased] = React.useState(false);
 
-const [isBookmarked, setIsBookmarked] = React.useState<boolean>(false)
+  const router = useRouter();
 
-const {showToast} = useToast()
+  useEffect(() => {
+    const keys = storage.getAllKeys();
+    if (!keys) {
+      console.log("No keys found in storage.");
+      setPurchased(false);
+      return;
+    }
 
+    const bookmarkKeys = keys.filter(
+      (key) =>
+        key.startsWith("enrolled-") &&
+        key.endsWith(header?.toString().trim() || ""),
+    );
+    console.log("Bookmark keys for header", header, ":", bookmarkKeys);
 
-// const addBookmark = (courseId: string) => {
-//     try {
-//         storage.set(`bookmark_${courseId}`, JSON.stringify({
-//             id: courseId,
-//             title,
-//             header: header || "",
-//             tutorName: tutorName || "",
-//             rating: rating || 0,
-//             description,
-//             price,
-//             thumbnailUrl,
-          
-//         }))
-//         setIsBookmarked(true)
-//         showToast("Course added to bookmarks", "success")
-//     } catch (error) {
-//           console.error("Error adding bookmark:", error);   
-//     }
-
-// }
-
-// const checkBookmark = (courseId: string) => {
-//     try {
-//         const bookmark = storage.getString(`bookmark_${courseId}`)
-//         console.log("Checking bookmark for courseId:", courseId, "Found bookmark:", bookmark)
-//         if (bookmark) {
-//             const parsedBookmark = JSON.parse(bookmark)
-//           {
-//             parsedBookmark.header === header && setIsBookmarked(true)
-//            }
-//            console.log("Parsed bookmark:", parsedBookmark)
-//        const alreadyBookmarked = current.some((item: Bookmark) => item.id === courseId && item.header === header)
-//      if(!alreadyBookmarked){
-//     setBookMarks([...current, {
-//         id: courseId,
-//         title,
-//         header: header || "",
-//         tutorName: tutorName || "",
-//         rating: rating || 0,
-//         description,
-//         price,
-//         thumbnailUrl,
-      
-//     }])
-//  }
- 
-//         } else {
-//             setIsBookmarked(false)     
-//             }
-//     } catch (error) {
-//           console.error("Error checking bookmark:", error);   
-//     }
-// }
-
-// React.useEffect(()=>{
-   
-//     checkBookmark(id.toString())
-// },[])
-
-
-// const removeBookmark = (courseId: string) => {
-//     try {
-//         storage.remove(`bookmark_${courseId}`)
-//         setIsBookmarked(false)
-//         showToast("Course removed from bookmarks", "info")
-//     } catch (error) {
-//           console.error("Error removing bookmark:", error);   
-//     }
-
-async function sendNotificationToUser(token: string, title: string, body: string, data?: any) {
-  try {
-    const res = await fetch('/api/send-push', {   // ← relative URL works in dev & prod
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ expoPushToken: "ExponentPushToken[GefJyYErRDt5it-NbZ3382]", title, body, data }),
+    const getId = bookmarkKeys.map((key) => {
+      const parts = key.split("-");
+      return parts.slice(1, -1).join("-"); // Extract the ID part
     });
-    console.log("Push response:", res);
 
-    if (!res.ok) throw new Error('Failed');
+    const correctId = getId.map((id) => id.toString().trim());
+    if (correctId.includes(id.toString())) {
+      console.log("Course is enrolled for header", header, ":", title);
+      setPurchased(true);
+    }
+  }, []);
 
-    console.log('Notification sent!');
- } catch (err) {
-    console.error('Send failed', err);
+  const randomProgress = Math.floor(Math.random() * 61) + 40;
+
+  if (isDataMissing) {
+    return <CourseCardSkeleton isHorizontal={isHorizontal} />;
   }
-}
 
-const router = useRouter()  
-
-    return (
-
-   <TouchableOpacity key={index}
-   onPress={async ()=>{
-    router.push(`/enrollmentPage?image=${"https://picsum.photos/200/300"}&title=${title}&description=${description}&price=${price}&tutorName=${            tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last)  || "Unknown Tutor"}&rating=${rating}&id=${id}`)
-    // await sendNotificationToUser("ExponentPushToken[GefJyYErRDt5it-NbZ3382]", "Course Selected", `You selected the course: ${title}`, { courseId: id })
-   }}
-   style={{
-    width: isHorizontal ? width - 100 :"100%", 
-    height: 300,
+  return (
+    <TouchableOpacity
+      key={index}
+      onPress={async () => {
+      {
+        isPurchasedDone?
+        router.replace(`/modules/content?title=${title}&id=${id}&tutorName=${tutorName}&rating=${rating}&header=${header}`):
+           router.push(`/enrollmentPage?image=${"https://picsum.photos/200/300"}&title=${title}&description=${description}&price=${price}&tutorName=${tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last) || "Unknown Tutor"}&rating=${rating}&id=${id}
+    &header=${header || ""}`);
+      }
+  }}
+      style={{
+        width: isHorizontal ? width - 100 : "100%",
+        height: 300,
         marginRight: isHorizontal ? 10 : 0,
-   }}
-   className=" flex-1    flex-col  mb-2  rounded-xl bg-light/50 dark:bg-gray-900 border-[0.2px] border-gray-500 overflow-hidden " >
-   
-     <Image
-         source={{ uri: "https://picsum.photos/200/300" }} 
-           resizeMode="cover"
-          style={{ width: "100%", height: "60%", marginVertical:"auto" }}
-        />
+        marginBottom: isHorizontal ? 0 : 20,
+      }}
+      className=" flex-1    flex-col   rounded-xl bg-light/50 dark:bg-gray-900 border-[0.2px] border-gray-500 overflow-hidden "
+    >
+      <Image
+        source={{ uri: "https://picsum.photos/200/300" }}
+        resizeMode="cover"
+        style={{ width: "100%", height: "60%", marginVertical: "auto" }}
+      />
 
+      <View className="flex-1 px-3 py-2 justify-between">
+        <View className="px-1">
+          <Text className="text-lg font-l-semibold text-light-title dark:text-dark-title">
+            {title}
+          </Text>
+          {!isPurchasedDone ? (
+            <>
+              <Text
+                numberOfLines={1}
+                style={{
+                  textOverflow: "ellipsis",
+                  width: "100%",
+                }}
+                className="text-sm  h-10 overflow-hidden font-l-regular text-light-body dark:text-dark-body mt-1"
+              >
+                {description}
+              </Text>
 
-    
-    
-        <View className="flex-1 px-3 py-2 justify-between">
-            <View className="px-1">
-                <Text className="text-lg font-l-semibold text-light-title dark:text-dark-title">
-                    {title}
-                </Text>
-                <Text
-                 numberOfLines={1}
-                 style={{
-                    textOverflow: "ellipsis",
-                    width: "100%",
-                 }}
-                className="text-sm  h-10 overflow-hidden font-l-regular text-light-body dark:text-dark-body mt-1">
-                    {description}
-                </Text>
-
-                   <Text
-                 numberOfLines={2}
-                className="text-sm   overflow-hidden font-l-semibold text-light-body dark:text-dark-body ">
-                {"\u20B9 "}{price} 
-                </Text>
-               {
-                rating && rating > 0 && (
-                    <View style={{
-                        backgroundColor: setRatingColor(rating),
-                    }} className="absolute top-2 right-2 px-1 py-0.5 rounded flex-row items-center">
-                     <MaterialIcons name="star" size={12} color="white" />
-                     <Text className="text-xs text-white font-l-semibold ml-1">{rating.toFixed(1)}</Text>
-                    </View>
-                )  }
-
-                  <Text className="text-sm  justify-center items-center gap-2  overflow-hidden font-l-semibold text-light-body dark:text-dark-body ">
-
-            {tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last)  || "Unknown Tutor"}
-                </Text>
-
-            </View>
+              <Text
+                numberOfLines={2}
+                className="text-sm   overflow-hidden font-l-semibold text-light-body dark:text-dark-body "
+              >
+                {"\u20B9 "}
+                {price}
+              </Text>
+              {rating && rating > 0 && (
+                <View
+                  style={{
+                    backgroundColor: setRatingColor(rating),
+                  }}
+                  className="absolute top-2 right-2 px-1 py-0.5 rounded flex-row items-center"
+                >
+                  <MaterialIcons name="star" size={12} color="white" />
+                  <Text className="text-xs text-white font-l-semibold ml-1">
+                    {rating.toFixed(1)}
+                  </Text>
                 </View>
+              )}
 
-                 
-   </TouchableOpacity>
-
-    )
+              <Text className="text-sm  justify-center items-center gap-2  overflow-hidden font-l-semibold text-light-body dark:text-dark-body ">
+                {tutors?.data?.[index]?.name?.first.concat(
+                  " ",
+                  tutors?.data?.[index]?.name?.last,
+                ) || "Unknown Tutor"}
+              </Text>
+            </>
+          ) : (
+            <View className="flex-col mt-3 items-start gap-2  justify-center">
+             
+                <Text className="text-sm font-l-semibold text-light-body dark:text-dark-body">
+                  Your Progress: {randomProgress}%
+                </Text>
+              <View className="bg-gray-200  dark:bg-zinc-500 rounded-full w-[90%] h-2 overflow-hidden">
+                <View
+                  style={{
+                    width: `${randomProgress}%`,
+                    backgroundColor: "#0ea5e9",
+                    height: "100%",
+                    borderRadius: 9999,
+                  }}
+                />
+              </View>
+               <Text className="text-sm font-l-semibold text-light-body dark:text-dark-body            ">
+          Resume Course
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 }
-    

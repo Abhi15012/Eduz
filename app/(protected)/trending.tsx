@@ -112,8 +112,6 @@ const setRatingColor = (rating: number) => {
 
 export default function Recentwallets({ from }: { from?: string }) {
   const [data, setData] = React.useState<Program[]>(DUMMY_DATA);
-  const { newItems } = useLocalSearchParams();
-  const router = useRouter();
 
   const [index, setIndex] = React.useState(0);
 
@@ -168,7 +166,7 @@ export default function Recentwallets({ from }: { from?: string }) {
           }
         }}
       >
-        <SafeAreaView className="flex-1 min-h-[55vh] justify-center">
+        <SafeAreaView className=" min-h-[55vh] justify-center">
          {/* <Bg opacity={0.34} /> */}
 
           

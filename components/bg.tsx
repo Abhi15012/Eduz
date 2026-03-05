@@ -16,7 +16,7 @@ export default function Bg({opacity}:{opacity?:number}) {
            top: 0,
            left: 0,
            right: 0,
-           opacity: opacity || 0.1,
+           opacity: opacity || 0.08,
         
            paddingVertical: 10,  
         height: height,
