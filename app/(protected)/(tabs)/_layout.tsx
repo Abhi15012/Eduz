@@ -1,4 +1,4 @@
-// app/_layout.tsx
+
 import { useTokenSync } from "@/config/store.functions";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BlurView } from "expo-blur";

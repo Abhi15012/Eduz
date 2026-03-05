@@ -9,17 +9,13 @@ import { useFocusEffect } from "@react-navigation/native";
 import { ScrollView } from "moti";
 import LegendListComponent from "../_components/legendList";
 
-
-
-
-
 export default function MyList() {
   const [headers, setHeaders] = React.useState<string[]>([]);
 
   const [storedCourses, setStoredCourses] = React.useState<any[]>([]);
   const [bookmarkedCourses, setBookmarkedCourses] = React.useState<any[]>([]);
 
-  const getCourses = coursesStore((state :any) => state.courses) || [];
+  const getCourses = coursesStore((state: any) => state.courses) || [];
   if (getCourses.length === 0 || getCourses === undefined) {
     console.log("No courses found in store.");
     return;
@@ -32,7 +28,6 @@ export default function MyList() {
     const keys = storage.getAllKeys();
     console.log("All keys in storage:", keys);
     if (!keys) {
-      
       console.log("No keys found in storage.");
       return;
     }
@@ -49,43 +44,47 @@ export default function MyList() {
     setHeaders(Array.from(uniqueHeaders));
   }, []);
 
-  const getCoursesForHeader = useCallback(
-    (header: string) => {
-      const keys = storage.getAllKeys();
-      if (!keys) {
-        console.log("No keys found in storage.");
-        return [];
-      }
-      const bookmarkKeys = keys.filter(
-        (key) => key.startsWith("enrolled-") && key.endsWith(header),
-      );
-      console.log("Bookmark keys for header", header, ":", bookmarkKeys);
+  const loadCoursesForAllHeaders = useCallback(() => {
+    const keys = storage.getAllKeys();
+    if (!keys) {
+      console.log("No keys found in storage.");
+      return;
+    }
+    const allCourses: any[] = [];
+
+    headers.forEach((header) => {
+      const bookmarkKeys = keys.filter((key) => key.startsWith("enrolled-"));
 
       const getId = bookmarkKeys.map((key) => {
         const parts = key.split("-");
-        return parts.slice(1, -1).join("-"); // Extract the ID part
+        return parts.slice(1, -1).join("-");
       });
 
       const correctId = getId.map((id) => id.toString().trim());
-      storedCourses.forEach((course) => {
-        if (correctId.includes(course.id.toString())) {
-          console.log("Course matched for header", header, ":", course.title);
-        }
-      });
-      setBookmarkedCourses(
-        storedCourses.filter((course) =>
-          correctId.includes(course.id.toString()),
-        ),
-      );
-    },
-    [storedCourses],
-  );
+      const matched = storedCourses
+        .filter((course) => correctId.includes(course.id.toString()))
+        .map((course) => ({ ...course, header }));
+
+      allCourses.push(...matched);
+    });
+
+    // Deduplicate by course id (keep first occurrence)
+    const seen = new Set<string>();
+    const unique = allCourses.filter((c) => {
+      const key = c.id.toString();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    setBookmarkedCourses(unique);
+  }, [storedCourses, headers]);
 
   useEffect(() => {
     if (headers.length > 0) {
-      getCoursesForHeader(headers[0]);
+      loadCoursesForAllHeaders();
     }
-  }, [headers, getCoursesForHeader]);
+  }, [headers, loadCoursesForAllHeaders]);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,9 +104,9 @@ export default function MyList() {
       {headers.length > 0 ? (
         <LegendListComponent
           data={bookmarkedCourses || []}
+          from={"myList"}
           numberOfItems={bookmarkedCourses.length}
           isHorizontal={false}
-          header={headers[0]}
         />
       ) : (
         <View className="flex-1 items-center justify-center">

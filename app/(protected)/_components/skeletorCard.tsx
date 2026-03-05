@@ -1,12 +1,12 @@
 import { Skeleton } from "moti/skeleton";
 import { useColorScheme } from "nativewind";
 import React from "react";
-import { Dimensions, View } from "react-native";
+import { Dimensions, DimensionValue, View } from "react-native";
 
 type ColorMode = "light" | "dark";
 
 interface SkeletonBlockProps {
-  width: number | string;
+  width: DimensionValue;
   height: number;
   radius?: number;
   colorMode: ColorMode;
@@ -18,13 +18,14 @@ const SkeletonBlock: React.FC<SkeletonBlockProps> = ({
   radius = 8,
   colorMode,
 }) => (
-  <Skeleton
-    colorMode={colorMode}
-    width={typeof width === "number" ? width : undefined}
-    height={height}
-    radius={radius}
-
-  />
+  <View style={{ width, height }}>
+    <Skeleton
+      colorMode={colorMode}
+      width={"100%"}
+      height={height}
+      radius={radius}
+    />
+  </View>
 );
 
 interface CourseCardSkeletonProps {
@@ -42,7 +43,7 @@ export const CourseCardSkeleton: React.FC<CourseCardSkeletonProps> = ({
   return (
     <View
       style={{
-        width: cardWidth,
+        width: "100%",
         height: 300,
         marginRight: isHorizontal ? 10 : 0,
       }}
@@ -63,7 +64,7 @@ export const CourseCardSkeleton: React.FC<CourseCardSkeletonProps> = ({
         </View>
 
         <View className="mt-3 space-y-2">
-          <SkeletonBlock width="45%" height={18} colorMode={colorMode} />
+          <SkeletonBlock width="100%" height={18} colorMode={colorMode} />
           <SkeletonBlock width="50%" height={16} colorMode={colorMode} />
         </View>
       </View>

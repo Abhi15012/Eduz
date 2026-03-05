@@ -5,10 +5,10 @@ import Bg from "@/components/bg";
 import { storage } from "@/constants/storage";
 
 import { coursesStore } from "@/store/dataStore";
+import { toAndFroStore } from "@/store/toandfro";
 import { useFocusEffect } from "@react-navigation/native";
 import { ScrollView } from "moti";
 import LegendListComponent from "../_components/legendList";
-import { toAndFroStore } from "@/store/toandfro";
 
 export default function BookMarks() {
   const [headers, setHeaders] = React.useState<string[]>([]);
@@ -16,7 +16,7 @@ export default function BookMarks() {
   const [storedCourses, setStoredCourses] = React.useState<any[]>([]);
   const [bookmarkedCourses, setBookmarkedCourses] = React.useState<any[]>([]);
 
-  const getCourses = coursesStore((state:any) => state.courses) || [];
+  const getCourses = coursesStore((state: any) => state.courses) || [];
   if (getCourses.length === 0 || getCourses === undefined) {
     console.log("No courses found in store.");
     return;
@@ -25,7 +25,7 @@ export default function BookMarks() {
     setStoredCourses(getCourses?.data || []);
   }, []);
   const toggleBookMark = toAndFroStore((state) => state.toggleBookmark);
-  if(toggleBookMark === undefined){
+  if (toggleBookMark === undefined) {
     console.log("toggleBookmark function is undefined in the store.");
   }
 
@@ -48,49 +48,55 @@ export default function BookMarks() {
     setHeaders(Array.from(uniqueHeaders));
   }, []);
 
-  const getCoursesForHeader = useCallback(
-    (header: string) => {
-      const keys = storage.getAllKeys();
-      if (!keys) {
-        console.log("No keys found in storage.");
-        return [];
-      }
+  const loadCoursesForAllHeaders = useCallback(() => {
+    const keys = storage.getAllKeys();
+    if (!keys) {
+      console.log("No keys found in storage.");
+      return;
+    }
+    const allCourses: any[] = [];
+
+    headers.forEach((header) => {
       const bookmarkKeys = keys.filter(
         (key) => key.startsWith("bookmark-") && key.endsWith(header),
       );
 
       const getId = bookmarkKeys.map((key) => {
         const parts = key.split("-");
-        return parts.slice(1, -1).join("-"); // Extract the ID part
+        return parts.slice(1, -1).join("-");
       });
 
       const correctId = getId.map((id) => id.toString().trim());
-      storedCourses.forEach((course) => {
-        if (correctId.includes(course.id.toString())) {
-          console.log(`Course with ID ${course.id} is bookmarked under header ${header}.`);
-        }
-      });
-      setBookmarkedCourses(
-        storedCourses.filter((course) =>
-          correctId.includes(course.id.toString()),
-        ),
+      const matched = storedCourses.filter((course) =>
+        correctId.includes(course.id.toString()),
       );
-    },
-    [storedCourses],
-  );
+
+      allCourses.push(...matched);
+    });
+
+   
+    const seen = new Set<string>();
+    const unique = allCourses.filter((c) => {
+      const key = c.id.toString();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    setBookmarkedCourses(unique);
+  }, [storedCourses, headers]);
 
   useEffect(() => {
-    if (headers.length > 0 || headers !== undefined) {
-      getCoursesForHeader(headers[0]);
+    if (headers.length > 0) {
+      loadCoursesForAllHeaders();
     }
-  }, [headers, getCoursesForHeader, toggleBookMark]);
+  }, [headers, loadCoursesForAllHeaders, toggleBookMark]);
 
   useFocusEffect(
     useCallback(() => {
       loadBookmarks();
     }, [loadBookmarks, toggleBookMark]),
   );
-
 
   return (
     <ScrollView

@@ -83,12 +83,16 @@ export default function SeeAll() {
         </Text>
       </View>
 
-      <TextInput
+     {
+        isFromSearch && (
+           <TextInput
         placeholder="Search courses..."
         className="bg-light dark:bg-gray-900 p-3 rounded-lg mb-4 text-light-title dark:text-dark-title"
         value={searchTexts}
         onChangeText={setSearchTexts}
       />
+        )
+     }
 
       <View className="flex-1">
         <LegendListComponent

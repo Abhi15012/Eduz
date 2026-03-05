@@ -6,22 +6,21 @@ import { useToast } from "@/hooks/useToast";
 
 import { toAndFroStore } from "@/store/toandfro";
 
-
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Dimensions,
   Modal,
   SectionList,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 import Animated, {
   Extrapolation,
@@ -35,10 +34,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-
-
 const AnimatedSectionList = Animated.createAnimatedComponent(SectionList);
-
 
 interface SectionItem {
   key: string;
@@ -48,7 +44,6 @@ interface Section {
   title: string;
   data: SectionItem[];
 }
-
 
 function buildSections({
   description,
@@ -61,14 +56,12 @@ function buildSections({
 }): Section[] {
   const sections: Section[] = [];
 
-
   if (description) {
     sections.push({
       title: "Description",
       data: [{ key: "desc", text: description }],
     });
   }
-
 
   sections.push({
     title: "What you'll learn",
@@ -80,7 +73,6 @@ function buildSections({
     ],
   });
 
-
   sections.push({
     title: "This course includes",
     data: [
@@ -89,10 +81,8 @@ function buildSections({
       { key: "inc-2", icon: "smartphone", label: "Access on mobile & desktop" },
       { key: "inc-3", icon: "award", label: "Certificate of completion" },
       { key: "inc-4", icon: "clock", label: "Full lifetime access" },
-
     ],
   });
-
 
   if (tutorName) {
     sections.push({
@@ -134,19 +124,18 @@ function buildSections({
         author: "Ananya R.",
         stars: 4,
         body: "Good explanations, but some sections could be more in-depth.",
-      }
+      },
     ],
   });
 
   return sections;
 }
 
-
 export default function EnrollmentPage() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const router = useRouter();
-  const [isDark] =  useState(colorScheme === "dark");
+  const [isDark] = useState(colorScheme === "dark");
 
   const { title, description, price, tutorName, rating, id, image, header } =
     useLocalSearchParams<{
@@ -160,46 +149,71 @@ export default function EnrollmentPage() {
       image?: string;
     }>();
 
+  const [isBookMarked, setBookMarked] = useState(false);
+  console.log("Course ID from params:", typeof id);
+  const checkBookmark = useCallback(() => {
+    if (!id) {
+      setBookMarked(false);
+      return;
+    }
 
- 
+    const bookmarked = storage.getString(`bookmark-${id}-${header}`.trim());
+    console.log("Bookmarked value for course", id, ":", bookmarked);
+    const isSaved = Boolean(header) && bookmarked === header;
+    setBookMarked(isSaved);
+  }, [header, id]);
 
-const [isBookMarked , setBookMarked] =useState(false)
- console.log("Course ID from params:", typeof id );
-const checkBookmark = useCallback(() => {
-  if (!id) {
-    setBookMarked(false);
-    return;
+  React.useEffect(() => {
+    checkBookmark();
+  }, [checkBookmark]);
+
+  async function sendLocalNotification(title: string, body: string) {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: { title, body, sound: true },
+        trigger: null,
+      });
+      console.log("Local notification sent!");
+    } catch (err) {
+      console.error("Notification send failed", err);
+    }
   }
 
-  const bookmarked = storage.getString(`bookmark-${id}-${header}`.trim());
-  console.log("Bookmarked value for course", id, ":", bookmarked);
-  const isSaved = Boolean(header) && bookmarked === header;
-  setBookMarked(isSaved);
-  
-}, [header, id]);
-
-React.useEffect(() => {
-  checkBookmark();
-}, [checkBookmark]);
-
-  const toggleBookmark = useCallback(() => {
+  const toggleBookmark = useCallback(async () => {
     console.log("Toggling bookmark for course", id);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isBookMarked) {
-     storage.remove(`bookmark-${id}-${header}`.trim())
-   toAndFroStore.getState().toggleBookmark()
-   console.log("Course", id, "removed from bookmarks");
-    setBookMarked(false)
+      storage.remove(`bookmark-${id}-${header}`.trim());
+      toAndFroStore.getState().toggleBookmark();
+      console.log("Course", id, "removed from bookmarks");
+      setBookMarked(false);
     } else {
       console.log("Bookmarking course", id, "with header", header);
-        storage.set(`bookmark-${id}-${header}`.trim(), `${header}`) 
-        toAndFroStore.getState().toggleBookmark()
-        console.log("Course", id, "bookmarked");
-        setBookMarked(true)
+      storage.set(`bookmark-${id}-${header}`.trim(), `${header}`);
+
+      toAndFroStore.getState().toggleBookmark();
+      console.log("Course", id, "bookmarked");
+      setBookMarked(true);
+
+      const keys = storage.getAllKeys();
+
+      if (!keys) {
+        console.log("No keys found in storage.");
+        return;
+      }
+      const bookmarkKeys = keys.filter((key) => key.startsWith("bookmark-"));
+      console.log("Current bookmark keys in storage:", bookmarkKeys.length);
+      if (bookmarkKeys.length % 5 === 0) {
+        console.log(
+          "Bookmark count is a multiple of 5. Sending notification...",
+        );
+        await sendLocalNotification(
+          "Keep it up!",
+          `You've bookmarked ${bookmarkKeys.length} courses. Check out your bookmarks to review them!`,
+        );
+      }
     }
   }, [
-
-
     id,
     title,
     description,
@@ -210,7 +224,6 @@ React.useEffect(() => {
     header,
     isBookMarked,
   ]);
-
 
   const sections = useMemo(
     () =>
@@ -257,15 +270,11 @@ React.useEffect(() => {
     return { opacity, transform: [{ scale }] };
   });
 
-
-
-
   const renderStars = (count: number) =>
     Array.from({ length: 5 }, (_, i) => (
       <MaterialCommunityIcons
         key={i}
         name="star"
-    
         size={14}
         color={i < count ? "#f59e0b" : isDark ? "#555" : "#d1d5db"}
       />
@@ -280,7 +289,6 @@ React.useEffect(() => {
   }) => {
     const sectionTitle = section.title;
 
-
     if (sectionTitle === "Description") {
       return (
         <View className="px-5 py-3">
@@ -292,7 +300,6 @@ React.useEffect(() => {
         </View>
       );
     }
-
 
     if (sectionTitle === "What you'll learn") {
       return (
@@ -312,7 +319,6 @@ React.useEffect(() => {
       );
     }
 
-   
     if (sectionTitle === "This course includes") {
       return (
         <View className="flex-row items-center px-5 py-2 gap-x-3">
@@ -330,11 +336,13 @@ React.useEffect(() => {
       );
     }
 
-  
     if (sectionTitle === "Instructor") {
       return (
-        <TouchableOpacity          onPress={() => {
-            router.replace(`/tutor?name=${item.name}&rating=${item.rating}&image=${"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80"}`);
+        <TouchableOpacity
+          onPress={() => {
+            router.replace(
+              `/tutor?name=${item.name}&rating=${item.rating}&image=${"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80"}`,
+            );
           }}
           className={`mx-5 my-2 p-4 rounded-xl border ${isDark ? "bg-input-dark border-gray-700" : "bg-input-light border-gray-200"}`}
         >
@@ -343,14 +351,13 @@ React.useEffect(() => {
               className="w-12 h-12 rounded-full items-center justify-center"
               style={{ backgroundColor: isDark ? "#334155" : "#e2e8f0" }}
             >
-            <Image
-              source={{
-                uri:
-                  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80",
-              }}
-              style={{ width: 40, height: 40, borderRadius: 20 }}
-              cachePolicy={"memory-disk"}
-            />
+              <Image
+                source={{
+                  uri: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80",
+                }}
+                style={{ width: 40, height: 40, borderRadius: 20 }}
+                cachePolicy={"memory-disk"}
+              />
             </View>
             <View>
               <Text
@@ -371,7 +378,6 @@ React.useEffect(() => {
         </TouchableOpacity>
       );
     }
-
 
     if (sectionTitle === "Reviews") {
       return (
@@ -410,31 +416,30 @@ React.useEffect(() => {
     </View>
   );
 
-  const {showToast} =useToast()
+  const { showToast } = useToast();
 
-  const [purchased, setPurchased] = useState(false)
+  const [purchased, setPurchased] = useState(false);
 
-
-
+  const isPurchasedDone = useMemo(() => {
+    if (!id) return false;
+    const enrolled = storage.getString(`enrolled-${id}-${header}`.trim());
+    return Boolean(header) && enrolled === header;
+  }, [header, id]);
 
   const buyNowHandler = () => {
-   try {
-    storage.set(`enrolled-${id?.trim()}-${header}`.trim(), `${header}`)
-    storage.remove(`bookmark-${id}-${header}`.trim())
-    setPurchased(true)
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    try {
+      storage.set(`enrolled-${id?.trim()}-${header}`.trim(), `${header}`);
+      storage.remove(`bookmark-${id}-${header}`.trim());
+      setPurchased(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Error saving enrollment data:", error);
+      showToast("Failed to enroll in the course. Please try again.", "error");
+    }
+  };
 
-   } catch (error) {
-    console.error("Error saving enrollment data:", error);
-    showToast("Failed to enroll in the course. Please try again.", "error");
-   }
-  }
- 
   return (
     <SafeAreaView className={`flex-1 ${isDark ? "bg-dark" : "bg-light"}`}>
-
-
-     
       <Animated.View
         style={[headerButtonsAnim, { top: insets.top + 8, left: 8 }]}
         className="absolute z-50"
@@ -443,12 +448,14 @@ React.useEffect(() => {
       </Animated.View>
 
       <Animated.View
-        style={[headerButtonsAnim, { top: insets.top + 20, right: 20 }]}
-        className={`absolute z-50 p-2 rounded-full ${isDark ? "bg-white/30" : "bg-white/90"}`}
+        style={[headerButtonsAnim, { top: insets.top + 25, right: 25 }]}
+        className={`absolute z-50 p-1 rounded-full ${isDark ? "bg-white/70" : "bg-white/90"}`}
       >
-        <TouchableOpacity onPress={() => {
-          toggleBookmark()
-        }}>
+        <TouchableOpacity
+          onPress={() => {
+            toggleBookmark();
+          }}
+        >
           <MaterialCommunityIcons
             name={isBookMarked === true ? "bookmark" : "bookmark-outline"}
             size={22}
@@ -457,7 +464,6 @@ React.useEffect(() => {
         </TouchableOpacity>
       </Animated.View>
 
- 
       <AnimatedSectionList
         sections={sections}
         keyExtractor={(item: any) => item.key}
@@ -498,7 +504,11 @@ React.useEffect(() => {
                 </Text>
                 {rating && (
                   <View className="flex-row items-center gap-x-1">
-                    <MaterialCommunityIcons name="star" size={12} color="#f59e0b" />
+                    <MaterialCommunityIcons
+                      name="star"
+                      size={12}
+                      color="#f59e0b"
+                    />
                     <Text className="text-white text-sm font-l-medium">
                       {rating}
                     </Text>
@@ -513,7 +523,6 @@ React.useEffect(() => {
         ListFooterComponent={<View style={{ height: 40 }} />}
       />
 
-     
       <LinearGradient
         colors={[
           "transparent",
@@ -537,19 +546,16 @@ React.useEffect(() => {
             </Text>
           </View>
 
-  
- <View className="w-2/3">
-
-          <Button
-            label="Buy Now"
-            onPress={() => {
-              buyNowHandler()
-            }}
-          />
- </View>
+          <View className="w-2/3">
+            <Button
+              label="Buy Now"
+              onPress={() => {
+                buyNowHandler();
+              }}
+            />
+          </View>
         </View>
       </LinearGradient>
-
 
       <Modal
         visible={purchased}
@@ -570,23 +576,29 @@ React.useEffect(() => {
             className="w-full bg-white rounded-xl p-6 items-center"
             style={{ maxWidth: 400 }}
           >
-            <MaterialCommunityIcons name="check-circle" size={48} color="#34d399" />
+            <MaterialCommunityIcons
+              name="check-circle"
+              size={48}
+              color="#34d399"
+            />
             <Text className="text-xl font-l-bold text-gray-800 mt-4">
               Purchase Successful!
             </Text>
             <Text className="text-center text-gray-600 mt-2 mb-6">
-              You have successfully enrolled in the course. Click below to start learning!
+              You have successfully enrolled in the course. Click the button
+              below to start learning.
             </Text>
-           <View className="w-full">
+            <View className="w-full">
               <Button
-              label="Go to Course"
-              onPress={() => {
-                
-                router.replace(`/modules/content?title=${title}&id=${id}&tutorName=${tutorName}&rating=${rating}&header=${header}`);
-              }}
-              fullWidth= {true}
-            />
-           </View>
+                label="Go to Course"
+                onPress={() => {
+                  router.replace(
+                    `/modules/topics?title=${title}&id=${id}&tutorName=${tutorName}&rating=${rating}&header=${header}`,
+                  );
+                }}
+                fullWidth={true}
+              />
+            </View>
           </View>
         </LinearGradient>
       </Modal>

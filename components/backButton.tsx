@@ -12,11 +12,9 @@ export default function BackButton({onPress}: {onPress?: () => void}) {
   return (
     <TouchableOpacity
     onPress={()=>{
-        if (onPress) {
-            onPress();
-        } else {
+       
             router.back();
-        }
+       
     }}
     style={{
         width: 35,
@@ -25,14 +23,14 @@ export default function BackButton({onPress}: {onPress?: () => void}) {
         padding:"auto",
        alignItems: 'center',
        borderRadius: 20,
-       backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.4)",
+       backgroundColor: isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(255, 255, 255, 0.7)",
        justifyContent: 'center',
     
     }}>
         <MaterialIcons
         name="chevron-left"
         size={26}
-        color={isDark ? "#fff" : "#000"}
+        color={isDark ? "#000" : "#000"}
         />
 
     </TouchableOpacity>

@@ -16,6 +16,8 @@ import {
 import HorizontalList from "../_components/horizontalList";
 import Searchui from "../_components/searchBar";
 import Trending from "../trending";
+import { storage } from "@/constants/storage";
+import CourseCard from "../_components/card";
 
 interface APIResponse<T> {
   sucess: boolean;
@@ -86,6 +88,7 @@ export default function list() {
 
   const list = [
     { id: "search-1", type: "search", component: <Searchui /> },
+   
 
     {
       id: "1",
@@ -152,13 +155,14 @@ export default function list() {
                 item.component
               ) : item.type === "search" ? (
                 item.component
-              ) : (
+              )  : (
                 <HorizontalList
                   header={item.header || ""}
                   data={item.data || []}
                   numberOfItems={5}
                 />
-              )}
+              )
+              }
             </>
           )}
           showsVerticalScrollIndicator={false}

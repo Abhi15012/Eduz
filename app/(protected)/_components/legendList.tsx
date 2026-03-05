@@ -16,6 +16,7 @@ interface Course {
   tutorName: string;
   rating: number;
   tutorId?: string;
+  header ?: string;
  
 }
 export default function LegendListComponent({
@@ -23,8 +24,9 @@ export default function LegendListComponent({
     numberOfItems,
     isHorizontal,
     header,
+    from
  
-}:{data: Course[], numberOfItems:number, isHorizontal?:boolean, header?: string,
+}:{data: Course[], numberOfItems:number, isHorizontal?:boolean, header?: string, from?: string
 
 }) {
 
@@ -85,7 +87,7 @@ const router = useRouter()
         ) : (      <CourseCard
         title={item.title}
           id={item.id}
-        header={header || ""}
+        header={from === "myList" ? item.header || "" : header || ""}
         isHorizontal={isHorizontal}
         description={item.description}
         price={item.price}

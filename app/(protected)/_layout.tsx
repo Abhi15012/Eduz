@@ -7,10 +7,14 @@ export default function _layout() {
  <Stack screenOptions={{
   headerShown:false
 }}>
-
-
-
-
+ <Stack.Screen name="(tabs)" 
+  options={
+    {
+      headerShown:false
+    }
+  }
+ />
+  
     <Stack.Screen name={"profile"} options={{headerShown:false,
       animation: "slide_from_right"
   }} />
@@ -26,7 +30,6 @@ export default function _layout() {
      presentation: "formSheet",
    
      
-      headerTitle: "Cohort Details",
             sheetAllowedDetents: [0.8], 
             sheetCornerRadius: 24,
             sheetInitialDetentIndex: 0,

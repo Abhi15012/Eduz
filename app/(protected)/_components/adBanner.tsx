@@ -17,7 +17,7 @@ interface AdBannerProps {
 }
 
 
-  async function sendNotificationToUser(
+ async function sendNotificationToUser(
     token: string,
     title: string,
     body: string,

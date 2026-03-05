@@ -84,7 +84,9 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
             <Text
               numberOfLines={2}
-       
+             style={{
+              color: isDark ? "#fff" : "#000",
+             }}
               className="text-sm font-l-regular text-left dark:text-white text-black flex-shrink"
             >
               {message}

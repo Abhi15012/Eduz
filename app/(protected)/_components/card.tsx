@@ -92,7 +92,8 @@ export default function CourseCard({
       onPress={async () => {
       {
         isPurchasedDone?
-        router.replace(`/modules/content?title=${title}&id=${id}&tutorName=${tutorName}&rating=${rating}&header=${header}`):
+        router.push(`/modules/topics?image=${"https://picsum.photos/200/300"}&title=${title}&description=${description}&price=${price}&tutorName=${tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last) || "Unknown Tutor"}&rating=${rating}&id=${id}
+    &header=${header || ""}`):
            router.push(`/enrollmentPage?image=${"https://picsum.photos/200/300"}&title=${title}&description=${description}&price=${price}&tutorName=${tutors?.data?.[index]?.name?.first.concat(" ", tutors?.data?.[index]?.name?.last) || "Unknown Tutor"}&rating=${rating}&id=${id}
     &header=${header || ""}`);
       }
