@@ -1,22 +1,22 @@
-import Bg from "@/components/bg";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
-    Animated,
-    Dimensions,
-    FlatList,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  FlatList,
+  Text,
+  View
 } from "react-native";
 import {
-    Directions,
-    FlingGestureHandler,
-    State,
+  Directions,
+  FlingGestureHandler,
+  State,
 } from "react-native-gesture-handler";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 interface Program {
   _id: string;
@@ -118,9 +118,7 @@ export default function Recentwallets({ from }: { from?: string }) {
   const { width } = Dimensions.get("window");
   const insets = useSafeAreaInsets();
 
-
-
-  const IMG_HEIGHT =  insets.bottom > 0 ? width -10 : width * 1.3;
+  const IMG_HEIGHT = insets.bottom > 0 ? width - 10 : width * 1.3;
   const IMG_WIDTH = width * 0.8;
 
   const scrollIndex = useRef(new Animated.Value(0)).current;
@@ -130,14 +128,11 @@ export default function Recentwallets({ from }: { from?: string }) {
     Animated.spring(scrollXAnimated, {
       toValue: scrollIndex,
       useNativeDriver: true,
+      stiffness: 150,
+      damping: 20,
+      mass: 1,
     }).start();
-  });
-  useEffect(() => {
-    Animated.spring(scrollXAnimated, {
-      toValue: scrollIndex,
-      useNativeDriver: true,
-    }).start();
-  });
+  }, [index]);
 
   return (
     <FlingGestureHandler
@@ -166,19 +161,17 @@ export default function Recentwallets({ from }: { from?: string }) {
           }
         }}
       >
-        <SafeAreaView className=" min-h-[55vh] justify-center">
-         {/* <Bg opacity={0.34} /> */}
+        <SafeAreaView className=" min-h-[65vh] justify-center">
+          {/* <Bg opacity={0.34} /> */}
 
-          
-              <Text className="font-l-semibold  text-lg dark:text-gray-200 mb-2 px-3">
-                Trending Courses
-              </Text>
-          
-         
+          <Text className="font-l-semibold  text-lg dark:text-gray-200 mb-2 px-3">
+            Trending Courses
+          </Text>
+
           <FlatList
             data={data}
             horizontal
-          inverted
+            inverted
             contentContainerStyle={{
               flex: 1,
               justifyContent: "center",
@@ -221,12 +214,12 @@ export default function Recentwallets({ from }: { from?: string }) {
                 <Animated.View
                   style={[
                     {
-                     position: "absolute",
-                     left: (-IMG_WIDTH -50) / 2,
+                      position: "absolute",
+                      left: (-IMG_WIDTH - 50) / 2,
                       transform: [{ translateX }, { scale }],
                       opacity,
                       width: IMG_WIDTH,
-                      height: IMG_HEIGHT-40,
+                      height: IMG_HEIGHT - 40,
                     },
                   ]}
                   className="bg-light dark:bg-gray-900 rounded-2xl overflow-hidden"
@@ -235,12 +228,11 @@ export default function Recentwallets({ from }: { from?: string }) {
                     source={{ uri: item.thumbnailUrl }}
                     style={{
                       width: IMG_WIDTH,
-                      height: IMG_HEIGHT * 0.5 ,
+                      height: IMG_HEIGHT * 0.5,
                     }}
                     contentFit="cover"
                   />
 
-               
                   {item.rating && item.rating > 0 && (
                     <View
                       style={{ backgroundColor: setRatingColor(item.rating) }}
@@ -253,7 +245,6 @@ export default function Recentwallets({ from }: { from?: string }) {
                     </View>
                   )}
 
-                
                   <View className="flex-1 px-3 py-2 justify-between">
                     <View className="px-1">
                       <Text
@@ -293,8 +284,6 @@ export default function Recentwallets({ from }: { from?: string }) {
                       <Text className="text-sm justify-center items-center gap-2 overflow-hidden font-l-semibold text-light-body dark:text-dark-body mt-1">
                         {item.tutorName}
                       </Text>
-
-                
                     </View>
                   </View>
                 </Animated.View>

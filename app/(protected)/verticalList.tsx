@@ -41,13 +41,14 @@ export default function SeeAll() {
   };
 
   useEffect(() => {
+    if (!isFromSearch) return;
     const delayDebounceFn = setTimeout(() => {
       console.log("Searching for:", searchTexts);
       searchFunction(searchTexts);
     }, 1000);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTexts, courseList]);
+  }, [searchTexts, courseList, isFromSearch]);
 
   useEffect(() => {
     if (!isFromSearch && data) {
@@ -83,16 +84,14 @@ export default function SeeAll() {
         </Text>
       </View>
 
-     {
-        isFromSearch && (
-           <TextInput
-        placeholder="Search courses..."
-        className="bg-light dark:bg-gray-900 p-3 rounded-lg mb-4 text-light-title dark:text-dark-title"
-        value={searchTexts}
-        onChangeText={setSearchTexts}
-      />
-        )
-     }
+      {isFromSearch && (
+        <TextInput
+          placeholder="Search courses..."
+          className="bg-light dark:bg-gray-900 p-3 rounded-lg mb-4 text-light-title dark:text-dark-title"
+          value={searchTexts}
+          onChangeText={setSearchTexts}
+        />
+      )}
 
       <View className="flex-1">
         <LegendListComponent

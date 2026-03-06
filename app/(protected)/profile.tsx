@@ -1,18 +1,15 @@
 import { View, Text, TouchableOpacity, Switch } from 'react-native'
-import React, { use, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/backButton'
 import Bg from '@/components/bg'
 import { useTokenSync } from '@/config/store.functions'
 import { MotiView } from 'moti'
 import { jwtDecode } from 'jwt-decode'
-import { useColorScheme, useColorScheme as useNativeWind } from 'nativewind'
+import { useColorScheme } from 'nativewind'
 import { router } from 'expo-router'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 
-const Icon = ({ label }: { label: string }) => (
-  <Text className="text-lg">{label}</Text>
-)
 
 export default function Profile() {
   const token = useTokenSync()
@@ -21,6 +18,11 @@ export default function Profile() {
  const { colorScheme, toggleColorScheme } = useColorScheme();
 
 const isDark = colorScheme === 'dark';
+const [darkSwitch, setDarkSwitch] = useState(isDark);
+
+useEffect(() => {
+  setDarkSwitch(isDark);
+}, [isDark]);
 
   console.log(isDark ? 'Dark mode is enabled' : 'Light mode is enabled');
 
@@ -132,8 +134,11 @@ function Divider() {
             </View>
           </View>
           <Switch
-            value={isDark}
-            onValueChange={toggleColorScheme}
+            value={darkSwitch}
+            onValueChange={() => {
+              setDarkSwitch(prev => !prev);
+              toggleColorScheme();
+            }}
             trackColor={{ false: '#e5e7eb', true: '#0ea5e9' }}
             thumbColor="#ffffff"
           />

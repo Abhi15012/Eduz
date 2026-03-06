@@ -52,9 +52,7 @@ async function sendNotificationToUser(
 }
 
 export function PremiumCourseBanner({ onPress }: AdBannerProps) {
-  const { width } = Dimensions.get("window");
 
-  console.log("Current push token:", usePushTokenStore.getState().expoPushToken);
 
   return (
     <Animated.View

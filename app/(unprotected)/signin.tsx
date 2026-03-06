@@ -1,6 +1,6 @@
 import { Button } from "@/components/appButton";
 import Bg from "@/components/bg";
-import { setToken, toggleSign } from "@/config/store.functions";
+import { setToken } from "@/config/store.functions";
 import { useToast } from "@/hooks/useToast";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,7 +49,7 @@ export default function Signin() {
         showToast("Signed in successfully!", "success");
         setToken(res.data.accessToken);
     
-        router.push("/list");
+        router.replace("/list");
         reset();
         
       } else {
@@ -176,7 +176,7 @@ export default function Signin() {
           transition={{ type: "timing", duration: 400, delay: 700 }}
         >
           <Button
-            label="Sign In"
+            label="Sign in"
             disabled={isSubmitting}
             onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}

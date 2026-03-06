@@ -6,15 +6,16 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-
+import * as Updates from "expo-updates";
 import { useColorScheme } from "nativewind";
 import React, { useEffect } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import Offline from "./offline";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 export const unstable_settings = {
   anchor: "(protected)",
@@ -28,6 +29,9 @@ export default function RootLayout() {
     Lexend_semibold: require("../assets/fonts/Lexend-SemiBold.ttf"),
     Lexend_thin: require("../assets/fonts/Lexend-Thin.ttf"),
   });
+
+  const { currentlyRunning, isUpdateAvailable, isUpdatePending } =
+    Updates.useUpdates();
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -79,43 +83,57 @@ export default function RootLayout() {
             {!isConnected ? (
               <Offline />
             ) : (
+              <>
+              {isUpdateAvailable && (
+                          <View
+                            style={{
+                              position: "absolute",
+                              top: 35,
+                              left: 0,
+                              right: 0,
+                              backgroundColor: "rgba(0, 0, 0, 0.5)",
+                              paddingHorizontal: 16,
+                              paddingVertical: 5,
+                              zIndex: 1,
+                              flexDirection: "row",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                         <FontAwesome6 name="cloud-arrow-down" size={16} color="white" />
+                            <Text
+                              style={{ color: "white", textAlign: "center" }}
+                            >
+                              A new update is being installed...
+                            </Text>
+                          </View>
+                        )}
+             
               <Stack
                 screenOptions={{
                   headerShown: false,
                 }}
               >
                 <Stack.Screen name="index" options={{ animation: "fade" }} />
-                <Stack.Screen name="+not-found" options={{ title: "Oops!" }} />
-                <Stack.Protected guard={hasToken}>
+               <Stack.Protected guard={hasToken}>
                   <Stack.Screen
                     name="(protected)"
                     options={{ gestureEnabled: false }}
                   />
                 </Stack.Protected>
-                <Stack.Screen
-                  name="onboarding"
-                  options={{
-                    animation: "slide_from_right",
-                    gestureEnabled: false,
-                  }}
-                />
+               
                 <Stack.Screen
                   name="(unprotected)"
                   options={{ gestureEnabled: false }}
                 />
-                <Stack.Screen
-                  name="privacy"
-                  options={{ animation: "slide_from_bottom" }}
-                />
-                <Stack.Screen
-                  name="terms"
-                  options={{ animation: "slide_from_bottom" }}
-                />
+             
                 <Stack.Screen
                   name="modal"
                   options={{ presentation: "modal" }}
                 />
               </Stack>
+              </>
             )}
             {}
           </View>

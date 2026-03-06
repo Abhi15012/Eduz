@@ -2,7 +2,7 @@
   "expo": {
     "name": "EduZ",
     "slug": "EduZ",
-    "version": "1.0.0",
+    "version": "1.0.1 stable",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "eduz",

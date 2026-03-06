@@ -60,15 +60,20 @@ export default function CourseCard({
       setPurchased(false);
       return;
     }
+    if(header === "My Learning"){
+      setPurchased(true);
+      return;
+    }
 
-    const bookmarkKeys = keys.filter(
+    const enrolledKeys = keys.filter(
+      // enrolled-${id?.trim()}-${header?.trim()}`.trim()
       (key) =>
         key.startsWith("enrolled-") &&
         key.endsWith(header?.toString().trim() || ""),
     );
-    console.log("Bookmark keys for header", header, ":", bookmarkKeys);
+    console.log("Enrolled keys for header", header, ":", enrolledKeys);
 
-    const getId = bookmarkKeys.map((key) => {
+    const getId = enrolledKeys.map((key) => {
       const parts = key.split("-");
       return parts.slice(1, -1).join("-"); // Extract the ID part
     });
@@ -107,7 +112,7 @@ export default function CourseCard({
       className=" flex-1    flex-col   rounded-xl bg-light/50 dark:bg-gray-900 border-[0.2px] border-gray-500 overflow-hidden "
     >
       <Image
-        source={{ uri: "https://picsum.photos/200/300" }}
+        source={{ uri: `https://picsum.photos/400/600?random=${index + 1}` }}
         resizeMode="cover"
         style={{ width: "100%", height: "60%", marginVertical: "auto" }}
       />

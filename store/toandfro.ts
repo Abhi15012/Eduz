@@ -1,13 +1,11 @@
 import { create } from "zustand";
 
 interface ToAndFroState {
-    isBookMarked: boolean;
-    toggleBookmark: () => void;
+  isBookMarked: boolean;
+  toggleBookmark: () => void;
 }
 
-
 export const toAndFroStore = create<ToAndFroState>((set) => ({
-    isBookMarked: false,
-    toggleBookmark: () =>  set((state)=> ({isBookMarked: !state.isBookMarked})),
+  isBookMarked: false,
+  toggleBookmark: () => set((state) => ({ isBookMarked: !state.isBookMarked })),
 }));
-console.log("ToAndFro Store initialized");

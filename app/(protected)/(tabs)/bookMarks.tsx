@@ -24,7 +24,8 @@ export default function BookMarks() {
   useEffect(() => {
     setStoredCourses(getCourses?.data || []);
   }, []);
-  const toggleBookMark = toAndFroStore((state) => state.toggleBookmark);
+  const toggleBookMark = toAndFroStore((state) => state.isBookMarked);
+  console.log("toggleBookmark function from store:", toggleBookMark);
   if (toggleBookMark === undefined) {
     console.log("toggleBookmark function is undefined in the store.");
   }
@@ -92,11 +93,17 @@ export default function BookMarks() {
     }
   }, [headers, loadCoursesForAllHeaders, toggleBookMark]);
 
+    useEffect(() => {
+    loadBookmarks();
+  }, [toggleBookMark]);
+
   useFocusEffect(
     useCallback(() => {
       loadBookmarks();
-    }, [loadBookmarks, toggleBookMark]),
+    }, []),
   );
+
+
 
   return (
     <ScrollView

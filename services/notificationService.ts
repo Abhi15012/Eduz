@@ -58,7 +58,7 @@ export async function registerForPushNotificationsAsync() {
 
   usePushTokenStore.getState().setExpoPushToken(token);
 
-  console.log("Expo Push Token:", token);
+
 
   return token;
 }

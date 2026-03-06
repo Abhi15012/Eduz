@@ -157,7 +157,7 @@ export default function EnrollmentPage() {
       return;
     }
 
-    const bookmarked = storage.getString(`bookmark-${id}-${header}`.trim());
+    const bookmarked = storage.getString(`bookmark-${id?.trim()}-${header?.trim()}`.trim());
     console.log("Bookmarked value for course", id, ":", bookmarked);
     const isSaved = Boolean(header) && bookmarked === header;
     setBookMarked(isSaved);
@@ -166,6 +166,9 @@ export default function EnrollmentPage() {
   React.useEffect(() => {
     checkBookmark();
   }, [checkBookmark]);
+
+
+
 
   async function sendLocalNotification(title: string, body: string) {
     try {
@@ -183,14 +186,15 @@ export default function EnrollmentPage() {
     console.log("Toggling bookmark for course", id);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isBookMarked) {
-      storage.remove(`bookmark-${id}-${header}`.trim());
+      storage.remove(`bookmark-${id?.trim()}-${header?.trim()}`.trim());
       toAndFroStore.getState().toggleBookmark();
+      showToast("Course removed from bookmarks", "info");
       console.log("Course", id, "removed from bookmarks");
       setBookMarked(false);
     } else {
       console.log("Bookmarking course", id, "with header", header);
-      storage.set(`bookmark-${id}-${header}`.trim(), `${header}`);
-
+      storage.set(`bookmark-${id?.trim()}-${header?.trim()}`.trim(), `${header}`);
+    showToast("Course added to bookmarks", "success");
       toAndFroStore.getState().toggleBookmark();
       console.log("Course", id, "bookmarked");
       setBookMarked(true);
@@ -340,7 +344,7 @@ export default function EnrollmentPage() {
       return (
         <TouchableOpacity
           onPress={() => {
-            router.replace(
+            router.push(
               `/tutor?name=${item.name}&rating=${item.rating}&image=${"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80"}`,
             );
           }}
@@ -420,17 +424,17 @@ export default function EnrollmentPage() {
 
   const [purchased, setPurchased] = useState(false);
 
-  const isPurchasedDone = useMemo(() => {
-    if (!id) return false;
-    const enrolled = storage.getString(`enrolled-${id}-${header}`.trim());
-    return Boolean(header) && enrolled === header;
-  }, [header, id]);
+  
+
+
 
   const buyNowHandler = () => {
     try {
-      storage.set(`enrolled-${id?.trim()}-${header}`.trim(), `${header}`);
-      storage.remove(`bookmark-${id}-${header}`.trim());
+      storage.set(`enrolled-${id?.trim()}-${header?.trim()}`.trim(), `${header}`);
+      storage.remove(`bookmark-${id?.trim()}-${header?.trim()}`.trim());
       setPurchased(true);
+      showToast("Enrollment successful! Welcome to the course.", "success");
+      toAndFroStore.getState().toggleBookmark();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error saving enrollment data:", error);

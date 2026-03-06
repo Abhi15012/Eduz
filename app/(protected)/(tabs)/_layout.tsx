@@ -123,7 +123,7 @@ export default function _layout() {
             borderTopWidth: 0,
             elevation: 7,
            height: 62,
-            marginHorizontal: 50,
+            marginHorizontal: 100,
             borderRadius: 35,
             overflow: "hidden",
 
@@ -166,20 +166,6 @@ export default function _layout() {
           }}
         />
 
-        <Tabs.Screen
-          name="myList"
-          options={{
-            headerShown: false,
-            tabBarLabel: "My Learning",
-            tabBarIcon: ({ focused }) => (
-              <MaterialIcons
-                name="shopping-cart"
-                size={24}
-                color={focused ? "#0ea5e9" : "#9CA3AF"}
-              />
-            ),
-          }}
-        />
 
         <Tabs.Screen
           name="bookMarks"

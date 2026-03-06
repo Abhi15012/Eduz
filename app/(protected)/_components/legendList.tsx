@@ -72,7 +72,7 @@ const router = useRouter()
     data={visibleItems}
  renderItem={({item, index}: LegendListRenderItemProps<Course | Bookmark>)=>(
     
-         item.id === "see-all" && isHorizontal=== true ? (
+        ( item.id === "see-all" && isHorizontal=== true && item.header !== "My Learning") ? (
             <TouchableOpacity 
           onPress={() => {
   router.push(
